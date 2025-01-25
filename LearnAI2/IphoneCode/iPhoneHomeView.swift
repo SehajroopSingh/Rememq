@@ -30,7 +30,7 @@ struct iPhoneHomeView: View {
                     Spacer()
                     Text("First")
                     Text("Second")
-                    Text("Third")
+                    Text("Thirds")
                     Spacer()
                     Spacer()
                 }
