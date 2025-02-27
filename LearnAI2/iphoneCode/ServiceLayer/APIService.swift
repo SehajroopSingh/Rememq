@@ -1,0 +1,110 @@
+//
+//  APIService.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 2/26/25.
+//
+
+
+import SwiftUI
+
+class APIService {
+    @AppStorage("accessToken") var accessToken: String = ""
+    @AppStorage("refreshToken") var refreshToken: String = ""
+    
+    static let shared = APIService()  // Singleton instance
+    
+    private let baseURL = "http://127.0.0.1:8000/api/"
+    
+    // ✅ Function to Perform API Requests with Auto Refresh
+    func performRequest(endpoint: String, method: String = "GET", body: [String: Any]? = nil, completion: @escaping (Result<Data, Error>) -> Void) {
+        
+        guard let url = URL(string: baseURL + endpoint) else {
+            completion(.failure(NSError(domain: "Invalid URL", code: 0, userInfo: nil)))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        if !accessToken.isEmpty {
+            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        }
+
+        if let body = body {
+            request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
+        }
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completion(.failure(NSError(domain: "Invalid response", code: 0, userInfo: nil)))
+                return
+            }
+
+            if httpResponse.statusCode == 401 {
+                // ✅ Unauthorized: Try Refreshing Token
+                self.refreshToken { success in
+                    if success {
+                        // Retry the original request with the new access token
+                        self.performRequest(endpoint: endpoint, method: method, body: body, completion: completion)
+                    } else {
+                        completion(.failure(NSError(domain: "Unauthorized", code: 401, userInfo: nil)))
+                    }
+                }
+            } else if let data = data {
+                completion(.success(data))
+            }
+        }.resume()
+    }
+    
+    // ✅ Function to Refresh Token
+    private func refreshToken(completion: @escaping (Bool) -> Void) {
+        guard let url = URL(string: baseURL + "token/refresh/") else {
+            completion(false)
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let body: [String: String] = ["refresh": refreshToken]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Token refresh error: \(error.localizedDescription)")
+                completion(false)
+                return
+            }
+
+            guard let data = data,
+                  let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: String],
+                  let newAccessToken = json["access"] else {
+                print("Failed to refresh token")
+                completion(false)
+                return
+            }
+
+            DispatchQueue.main.async {
+                self.accessToken = newAccessToken
+                print("Token refreshed successfully!")
+                completion(true)
+            }
+        }.resume()
+    }
+    
+    // ✅ Function to Log Out
+    func logoutUser() {
+        DispatchQueue.main.async {
+            self.accessToken = ""
+            self.refreshToken = ""
+        }
+    }
+}

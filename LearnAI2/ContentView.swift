@@ -11,6 +11,9 @@ struct ContentView: View {
     }
 }
 
+
+
+
 struct MacHomeView: View {
     @State private var recognizedText: String = "Recognized text will appear here."
     @State private var message: String = ""
@@ -67,3 +70,5 @@ struct MacHomeView: View {
         self.message = "Text sent to backend successfully!"
     }
 }
+
+

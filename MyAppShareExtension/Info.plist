@@ -14,10 +14,10 @@
 				<true/>
 			</dict>
 		</dict>
-		<key>NSExtensionMainStoryboard</key>
-		<string>MainInterface</string>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.share-services</string>
+		<key>NSExtensionPrincipalClass</key>
+		<string>PrincipalClassName</string>
 	</dict>
 </dict>
 </plist>

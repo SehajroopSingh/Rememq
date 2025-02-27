@@ -1,48 +1,36 @@
-//
-//  SharedTextModel.swift
-//  LearnAI2
-//
-//  Created by Sehaj Singh on 1/20/25.
-//
-
 import Foundation
 
-/// A model representing shared text data.
-struct SharedTextModel: Codable {
-    // The shared text content
-    var text: String
-
-    // Metadata about when the text was shared
-    var sharedDate: Date
-
-    // Optional tags or categories for the shared text
-    var tags: [String]?
-
-    // MARK: - Initializer
-    init(text: String, sharedDate: Date = Date(), tags: [String]? = nil) {
-        self.text = text
-        self.sharedDate = sharedDate
-        self.tags = tags
+struct SharedContainerManager {
+    // Replace this identifier with your actual App Group identifier.
+    static let appGroupIdentifier = "group.learnai2"
+    
+    // File name where the shared text will be stored.
+    static let fileName = "SharedText.txt"
+    
+    /// Returns the URL of the shared container's file.
+    static var sharedFileURL: URL? {
+        let fileManager = FileManager.default
+        if let containerURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) {
+            print("Shared container URL: \(containerURL)")
+            return containerURL.appendingPathComponent(fileName)
+        }
+        print("No container URL found for identifier \(appGroupIdentifier)")
+        return nil
     }
-
-    // MARK: - Methods
-
-    /// Validates that the text is not empty.
-    func isValid() -> Bool {
-        return !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    
+    /// Saves text to the shared file.
+    static func save(text: String) throws {
+        guard let url = sharedFileURL else {
+            throw NSError(domain: "SharedContainer", code: 1, userInfo: [NSLocalizedDescriptionKey: "Container URL not found"])
+        }
+        try text.write(to: url, atomically: true, encoding: .utf8)
     }
-
-    /// Provides a summary of the text (e.g., first 50 characters).
-    func summary() -> String {
-        return String(text.prefix(50)) + (text.count > 50 ? "..." : "")
-    }
-
-    /// Converts the model to a dictionary for storage or networking.
-    func toDictionary() -> [String: Any] {
-        return [
-            "text": text,
-            "sharedDate": sharedDate.timeIntervalSince1970,
-            "tags": tags ?? []
-        ]
+    
+    /// Reads text from the shared file.
+    static func loadText() throws -> String {
+        guard let url = sharedFileURL else {
+            throw NSError(domain: "SharedContainer", code: 1, userInfo: [NSLocalizedDescriptionKey: "Container URL not found"])
+        }
+        return try String(contentsOf: url, encoding: .utf8)
     }
 }
