@@ -1,20 +1,32 @@
-//
-//  HomeView.swift
-//  ReMEMq
-//
-//  Created by Sehaj Singh on 2/28/25.
-//
-
-
 import SwiftUI
 
 // Define the first view
 struct HomeView: View {
+    // State variable for showing the alert
+    @State private var showAlert = false
+    
     var body: some View {
         VStack {
             Text("Home")
                 .font(.largeTitle)
                 .padding()
+            
+            Button(action: {
+                self.showAlert = true
+            }) {
+                Label("Show Alert", systemImage: "bell.fill")
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.blue)
+                    .cornerRadius(10)
+            }
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("Alert"),
+                    message: Text("This is an alert message!"),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
         }
     }
 }

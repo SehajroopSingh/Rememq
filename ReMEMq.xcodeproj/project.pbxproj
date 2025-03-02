@@ -304,6 +304,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				1EAF31BD2D5399B900C4AA52 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				1E91088A2D73CF6900A152FC /* XCRemoteSwiftPackageReference "SwiftCharts" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1E515EFA2D102901001733EF /* Products */;
@@ -584,6 +585,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 15.1;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.learnai2sehajroop;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = com.LearnAI2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = auto;
@@ -793,6 +795,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		1E91088A2D73CF6900A152FC /* XCRemoteSwiftPackageReference "SwiftCharts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/i-schuetz/SwiftCharts";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.6.5;
+			};
+		};
 		1EAF31BD2D5399B900C4AA52 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/GoogleSignIn-iOS.git";

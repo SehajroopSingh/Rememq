@@ -1,43 +1,29 @@
 import SwiftUI
-import SwiftCharts
+import Charts
 
-struct ChartView: UIViewRepresentable {
+struct ChartView: View {
     var values: [Double]
 
-    func makeUIView(context: Context) -> LineChartView {
-        // Create the chart model
-        let chartModel = ChartSettings()
-        let frame = CGRect(x: 0, y: 0, width: 300, height: 200)
-        
-        let labelSettings = ChartLabelSettings(font: UIFont.systemFont(ofSize: 14))
-        let lineModel = ChartLineModel(
-            chartPoints: values.enumerated().map { ChartPoint(x: ChartAxisValueDouble(Double($0)), y: ChartAxisValueDouble($1)) },
-            lineColor: UIColor.blue,
-            lineWidth: 2
-        )
-        
-        let xAxisModel = ChartAxisModel(fromMin: ChartAxisValueDouble(0), toMax: ChartAxisValueDouble(values.count - 1), byIntValue: 1, labelSettings: labelSettings)
-        let yAxisModel = ChartAxisModel(fromMin: ChartAxisValueDouble(0), toMax: ChartAxisValueDouble(values.max() ?? 0), byIntValue: 1, labelSettings: labelSettings)
-        
-        let chart = LineChart(
-            frame,
-            xModel: xAxisModel,
-            yModel: yAxisModel,
-            chartSettings: chartModel,
-            lines: [lineModel],
-            animPolicy: AnimPolicy(duration: 2),
-            innerFrame: nil
-        )
-        
-        return LineChartView(chart: chart)
-    }
-
-    func updateUIView(_ uiView: UIView, context: Context) {
-        // Update the UI if necessary
+    var body: some View {
+        Chart {
+            ForEach(Array(values.enumerated()), id: \.0) { item in
+                let index = item.0
+                let value = item.1
+                
+                LineMark(
+                    x: .value("Index", index),
+                    y: .value("Value", value)
+                )
+                .foregroundStyle(.blue)
+                .lineStyle(StrokeStyle(lineWidth: 2))
+            }
+        }
+        .frame(height: 200)
+        .padding()
     }
 }
 
-struct ContentView: View {
+struct ContentView2: View {
     @State private var values = [3.0, 5.0, 10.0, 7.0, 9.0]
 
     var body: some View {
@@ -45,15 +31,15 @@ struct ContentView: View {
             ChartView(values: values)
             
             Button("Change Values") {
-                // Generate new random values
-                self.values = (0..<5).map { Double.random(in: 0...10) }
+                self.values = (0..<5).map { _ in Double.random(in: 0...10) }
             }
+            .padding()
         }
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct ContentView_Previews2: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView2()
     }
 }
