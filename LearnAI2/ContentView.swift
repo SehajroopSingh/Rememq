@@ -6,7 +6,7 @@ struct ContentView: View {
         #if os(macOS)
         MacHomeView()
         #elseif os(iOS)
-        iPhoneHomeView()
+        HomeView()
         #endif
     }
 }
@@ -70,5 +70,3 @@ struct MacHomeView: View {
         self.message = "Text sent to backend successfully!"
     }
 }
-
-

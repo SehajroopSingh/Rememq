@@ -51,7 +51,7 @@ struct LoginView: View {
                 SignupView()
             }
             .navigationDestination(isPresented: $isAuthenticated) {
-                iPhoneHomeView()
+                MainContentView()
             }
         }
     }

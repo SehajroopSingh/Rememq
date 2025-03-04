@@ -11,7 +11,7 @@ import SwiftUI
 struct LearnAI2App: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView() // Now RootView will decide which view to show based on authentication and OS
         }
     }
 }

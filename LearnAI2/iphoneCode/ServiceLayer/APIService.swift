@@ -63,7 +63,6 @@ class APIService {
         }.resume()
     }
     
-    // ✅ Function to Refresh Token
     private func refreshToken(completion: @escaping (Bool) -> Void) {
         guard let url = URL(string: baseURL + "token/refresh/") else {
             completion(false)
@@ -83,11 +82,32 @@ class APIService {
                 completion(false)
                 return
             }
-
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completion(false)
+                return
+            }
+            
+            // Check if the refresh token is invalid or expired (HTTP 401)
+            if httpResponse.statusCode == 401 {
+                if let data = data, let rawResponse = String(data: data, encoding: .utf8) {
+                    print("Refresh token response status: \(httpResponse.statusCode)")
+                    print("Raw refresh token response: \(rawResponse)")
+                }
+                // Failed to refresh token, force logout.
+                DispatchQueue.main.async {
+                    print("Refresh token expired, logging out...")
+                    self.logoutUser()  // Clears tokens and resets authentication state.
+                }
+                completion(false)
+                return
+                
+            }
+            
             guard let data = data,
                   let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: String],
                   let newAccessToken = json["access"] else {
-                print("Failed to refresh token")
+                print("Failed to refresh stoken")
                 completion(false)
                 return
             }
@@ -99,6 +119,8 @@ class APIService {
             }
         }.resume()
     }
+
+
     
     // ✅ Function to Log Out
     func logoutUser() {

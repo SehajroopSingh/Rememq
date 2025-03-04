@@ -1,6 +1,6 @@
 import Foundation
 
-struct SharedContainerManager {
+struct SharedContainerManager1 {
     // Replace this identifier with your actual App Group identifier.
     static let appGroupIdentifier = "group.learnai2"
     

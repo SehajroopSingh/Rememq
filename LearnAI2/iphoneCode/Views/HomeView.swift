@@ -31,16 +31,7 @@ struct HomeView: View {
     }
 }
 
-// Define the second view
-struct ProfileView: View {
-    var body: some View {
-        VStack {
-            Text("Profile")
-                .font(.largeTitle)
-                .padding()
-        }
-    }
-}
+
 
 // Define the third view
 struct SettingsView: View {
@@ -74,41 +65,83 @@ struct MessagesView: View {
         }
     }
 }
+import SwiftUI
 
-// Main tab bar view
-struct ContentView1: View {
+struct MainContentView: View {
+    @State private var selectedTab = 0  // Track which tab is selected
+    @State private var showProfileMenu = false  // ✅ Toggle profile menu
+    @State private var navigateToProfile = false  // ✅ Navigate to Profile
+    @State private var navigateToAdvancedSettings = false  // ✅ Navigate to Advanced Settings
+
     var body: some View {
-        TabView {
-            HomeView()
-                .tabItem {
-                    Label("Home", systemImage: "house.fill")
+        NavigationStack {
+            ZStack {
+                TabView(selection: $selectedTab) {
+                    QuickCaptureView()
+                        .tabItem {
+                            Label("Home", systemImage: "house.fill")
+                        }
+                        .tag(0)
+                    QuickCapturesListView()  // Replacing MessagesView with new view
+                        .tabItem {
+                            Label("Quick Captures", systemImage: "doc.text.fill")
+                        }
+                        .tag(3)
+                    
+                    SettingsView()
+                        .tabItem {
+                            Label("Settings", systemImage: "gearshape.fill")
+                        }
+                        .tag(1)
+
+                    NotificationsView()
+                        .tabItem {
+                            Label("Notifications", systemImage: "bell.fill")
+                        }
+                        .tag(2)
+
+
+                    ProfileView()
+                        .tabItem {
+                            Label("Profile", systemImage: "person.crop.circle.fill")
+                        }
+                        .tag(4)
+                        .onAppear {
+                            showProfileMenu = true  // ✅ Show menu when tab is tapped
+                        }
                 }
 
-            ProfileView()
-                .tabItem {
-                    Label("Profile", systemImage: "person.circle.fill")
+                // ✅ Pop-up menu appears above Profile tab
+                if showProfileMenu {
+                    VStack {
+                        Spacer()
+                        ProfilePopupMenu(
+                            showProfileMenu: $showProfileMenu,
+                            navigateToProfile: $navigateToProfile,
+                            navigateToAdvancedSettings: $navigateToAdvancedSettings
+                        )
+                        .transition(.opacity)  // Smooth fade-in effect
+                        .animation(.easeInOut, value: showProfileMenu)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.black.opacity(0.3))  // Tap outside to dismiss
+                    .onTapGesture {
+                        showProfileMenu = false  // ✅ Close menu when tapping outside
+                    }
                 }
-
-            SettingsView()
-                .tabItem {
-                    Label("Settings", systemImage: "gearshape.fill")
-                }
-
-            NotificationsView()
-                .tabItem {
-                    Label("Notifications", systemImage: "bell.fill")
-                }
-
-            MessagesView()
-                .tabItem {
-                    Label("Messages", systemImage: "message.fill")
-                }
+            }
+            .navigationDestination(isPresented: $navigateToProfile) {
+                ProfileView()
+            }
+            .navigationDestination(isPresented: $navigateToAdvancedSettings) {
+                AdvancedSettingsView()
+            }
         }
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView1()
+        MainContentView()
     }
 }
