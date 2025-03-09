@@ -75,6 +75,8 @@
 			membershipExceptions = (
 				Models/GamificationStats.swift,
 				Models/ModelConfiguration.swift,
+				Models/QuickCaptureModel.swift,
+				Models/Quiz.swift,
 				Models/Sharing/Destination.swift,
 				Models/Sharing/SharedTextModel.swift,
 				Models/UserProfile.swift,

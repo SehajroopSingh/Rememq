@@ -14,7 +14,7 @@ class APIService {
     
     static let shared = APIService()  // Singleton instance
     
-    private let baseURL = "http://127.0.0.1:8000/api/"
+    private let baseURL = "https://1479-58-8-65-88.ngrok-free.app/api/"
     
     // ✅ Function to Perform API Requests with Auto Refresh
     func performRequest(endpoint: String, method: String = "GET", body: [String: Any]? = nil, completion: @escaping (Result<Data, Error>) -> Void) {

@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct LearnAI2App: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate  // Add this line
+
     var body: some Scene {
         WindowGroup {
             RootView() // Now RootView will decide which view to show based on authentication and OS
+
         }
     }
 }

@@ -154,54 +154,8 @@ struct QuizListView: View {
     }
 }
 
-//// ✅ Separate quiz card view
-//struct QuizCardView: View {
-//    let quiz: Quiz
-//
-//    var body: some View {
-//        VStack(alignment: .leading, spacing: 5) {
-//            Text(quiz.question)
-//                .font(.headline)
-//            if let choices = quiz.choices {
-//                ForEach(choices, id: \.self) { choice in
-//                    Text("• \(choice)")
-//                }
-//            }
-//            Text("✅ Answer: \(quiz.correct_answer)")
-//                .font(.subheadline)
-//                .foregroundColor(.green)
-//        }
-//        .padding()
-//        .background(Color.gray.opacity(0.1))
-//        .cornerRadius(8)
-//    }
-//}
-//
-//
-struct QuickCapture: Identifiable, Codable {
-    let id: Int
-    let content: String
-    let summary: String
-    let category: String?
-    let created_at: String?
-    let quizzes: [Quiz]  // ✅ Added quizzes
-}
 
-struct Quiz: Identifiable, Codable {
-    let id: Int
-    let question: String
-    let choices: [String]?
-    let correct_answer: String  // ✅ Use this name
-    let quiz_type: String       // ✅ Matches API response
 
-    enum CodingKeys: String, CodingKey {
-        case id
-        case question
-        case choices
-        case correct_answer = "correct_answer"  // ✅ Matches JSON key from API
-        case quiz_type = "quiz_type"            // ✅ Matches JSON key from API
-    }
-}
 
 // Response wrapper (matches Django API structure)
 struct QuickCapturesResponse: Codable {
