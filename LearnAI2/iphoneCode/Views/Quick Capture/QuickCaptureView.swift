@@ -39,7 +39,7 @@ struct QuickCaptureView: View {
                 }
                 .padding()
                 
-                Spacer()
+//                Spacer()
             }
             .padding()
             .fullScreenCover(isPresented: $isExpanded) {

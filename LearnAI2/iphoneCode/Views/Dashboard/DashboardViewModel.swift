@@ -1,37 +1,55 @@
 import SwiftUI
 import Combine
 
-/// An observable view model that manages fetching/loading dashboard data.
+/// Manages fetching/loading dashboard data.
 class DashboardViewModel: ObservableObject {
+    // MARK: - Published Properties
     @Published var dashboardData: DashboardData?
-    @Published var errorMessage: String? = nil
-    
-    init() {
-        loadDashboard()
+    @Published var errorMessage: String?
+    @Published var isLoading: Bool = false
+
+    // MARK: - Init with optional mock data
+    init(mockData: DashboardData? = nil) {
+        if let mockData = mockData {
+            // 1) If mockData is provided (e.g. from a preview), just use it
+            self.dashboardData = mockData
+            print("🧪 Using Mock Dashboard Data: \(mockData)")
+        } else {
+            // 2) Otherwise, go through the normal load sequence
+            loadDashboard()
+        }
     }
     
-    /// Main function to load the dashboard data:
-    /// 1) Check local
-    /// 2) If nil, fetch from API
-    /// 3) If neither available, fallback to defaults
+    // MARK: - Public: Load or Refresh
+    /// Loads the dashboard data:
+    /// - Tries local storage first
+    /// - Calls API if no local data
+    /// - Sets default values if both fail
     func loadDashboard() {
-        // 1) Try local storage
+        print("📡 Loading Dashboard Data from local/API...")
+
+        isLoading = true
+        
+        // 1) Try loading from local storage
         if let localData = LocalDashboardStore.loadDashboardData() {
+            print("✅ Loaded from Local Storage: \(localData)")
             self.dashboardData = localData
+            isLoading = false
             return
         }
         
-        // 2) Fetch from the remote API if no local data found
+        // 2) If no local data found, fetch from API
         fetchFromAPI { [weak self] result in
             DispatchQueue.main.async {
+                self?.isLoading = false
                 switch result {
                 case .success(let data):
+                    print("✅ Fetched from API: \(data)")
                     self?.dashboardData = data
-                    // Save to local store for next time
                     LocalDashboardStore.saveDashboardData(data)
                     
                 case .failure(let error):
-                    print("Dashboard API error: \(error.localizedDescription)")
+                    print("❌ API Fetch Failed: \(error.localizedDescription)")
                     self?.errorMessage = error.localizedDescription
                     self?.setDefaultValues()
                 }
@@ -39,28 +57,34 @@ class DashboardViewModel: ObservableObject {
         }
     }
     
-    /// Attempts to fetch data via the APIService
+    // MARK: - Private: Fetch from API
     private func fetchFromAPI(completion: @escaping (Result<DashboardData, Error>) -> Void) {
         APIService.shared.performRequest(endpoint: "dashboard/", method: "GET") { result in
             switch result {
             case .success(let data):
-                // Attempt to decode the JSON into DashboardData
-                if let decoded = try? JSONDecoder().decode(DashboardData.self, from: data) {
-                    completion(.success(decoded))
-                } else {
-                    // JSON parsing failed
-                    let parsingError = NSError(domain: "JSON Parsing", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse dashboard data"])
-                    completion(.failure(parsingError))
+                // 1) Print raw JSON for debugging
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    print("🔎 RAW JSON RESPONSE: \(jsonString)")
                 }
+                // 2) Attempt decoding
+                do {
+                    let decoded = try JSONDecoder().decode(DashboardData.self, from: data)
+                    completion(.success(decoded))
+                } catch {
+                    print("❌ JSON Parsing Error: \(error.localizedDescription)")
+                    completion(.failure(error))
+                }
+                
             case .failure(let error):
-                // Network or token refresh failed
                 completion(.failure(error))
             }
         }
     }
     
-    /// Called when both local + API fail, sets default 1 values.
+    // MARK: - Private: Fallback
+    /// Sets default values when neither local nor API data is available.
     private func setDefaultValues() {
+        print("⚠️ Setting Default Values (No Local or API Data)")
         self.dashboardData = DashboardData(hearts: 1, xp: 1, streak: 1, gems: 1)
     }
 }

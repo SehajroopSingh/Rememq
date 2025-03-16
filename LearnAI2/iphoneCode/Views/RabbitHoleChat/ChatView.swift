@@ -1,7 +1,19 @@
+//
+//  ChatView.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 3/13/25.
+//
+
+
 import SwiftUI
 
 struct ChatView: View {
-    @StateObject private var viewModel = ChatViewModel()
+    @StateObject var viewModel: ChatViewModel  // No default initialization here
+
+    init(viewModel: ChatViewModel = ChatViewModel()) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
 
     var body: some View {
         VStack {
@@ -10,7 +22,6 @@ struct ChatView: View {
                 LazyVStack(alignment: .leading, spacing: 12) {
                     ForEach(viewModel.messages) { message in
                         MessageBubbleView(message: message) {
-                            // Called when user chooses "Add to Captures" from context menu
                             viewModel.addTextToCaptures(message.content)
                         }
                     }
@@ -35,6 +46,7 @@ struct ChatView: View {
         .navigationTitle("AI Chat")
     }
 }
+
 
 // A simple bubble-like view for each message
 struct MessageBubbleView: View {
@@ -68,5 +80,34 @@ struct MessageBubbleView: View {
                 }
             }
         }
+    }
+}
+
+//struct ChatView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ChatView()
+//    }
+//}
+//struct ChatView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        let mockViewModel = ChatViewModel()
+//        mockViewModel.messages = [
+//            ChatMessage(content: "Hello, AI!", sender: "user"),
+//            ChatMessage(content: "Hi! How can I help?", sender: "ai")
+//        ]
+//        
+//        return ChatView()
+//            .environmentObject(mockViewModel)  // Inject preview data
+//    }
+//}
+struct ChatView_Previews: PreviewProvider {
+    static var previews: some View {
+        let mockViewModel = ChatViewModel()
+        mockViewModel.messages = [
+            ChatMessage(content: "Hello, AI!", sender: "user"),
+            ChatMessage(content: "Hi! How can I help?", sender: "ai")
+        ]
+
+        return ChatView(viewModel: mockViewModel)  // Inject mock ViewModel
     }
 }

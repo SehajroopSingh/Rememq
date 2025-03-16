@@ -1,147 +1,122 @@
-//
-//  CustomTabBarExample.swift
-//  YourApp
-//
-//  Created by YourName on [Date].
-//
-
 import SwiftUI
 
 struct CustomTabBarExample: View {
     @State private var selectedTab = 0
-    
+
     var body: some View {
-        ZStack {
-            // 1) The pages you want to tab through
+        NavigationStack {
             TabView(selection: $selectedTab) {
-                QuickCaptureView()
+                DashboardView()
                     .tag(0)
-                
+
                 QuickCapturesListView()
                     .tag(1)
-                
-                // This could be a placeholder or your target view
-                // for the "Plus" action if you prefer an actual screen
-                Color.clear
+
+                // The Chat tab
+                ChatView()
                     .tag(2)
-                
-                NotificationsView()
+
+                NotificationsView1()
                     .tag(3)
-                
-                ProfileView()
+
+                SocialView()
                     .tag(4)
             }
-            // Hide default tab bar (iOS 16+)
             .toolbar(.hidden, for: .tabBar)
-            
-            // 2) A custom "tab bar" at the bottom
-            VStack {
-                Spacer()
-                
-                HStack {
-                    // MARK: Home
-                    Button(action: {
-                        selectedTab = 0
-                    }) {
-                        VStack {
-                            Image(systemName: "house.fill")
-                            Text("Home")
-                                .font(.footnote)
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    // MARK: QuickCapturesList
-                    Button(action: {
-                        selectedTab = 1
-                    }) {
-                        VStack {
-                            Image(systemName: "doc.text.fill")
-                            Text("Captures")
-                                .font(.footnote)
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    // MARK: The oversized plus button in the center
-                    Button(action: {
-                        // Action for "Quick Capture" goes here
-                        // e.g., show a sheet or navigate
-                        selectedTab = 2
-                    }) {
-                        Image(systemName: "plus.circle.fill")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                            .foregroundColor(.blue)
-                            .background(Color.white.opacity(0.8))
-                            .clipShape(Circle())
-                            .shadow(radius: 3)
-                    }
-                    .offset(y: -20) // Float above bar a bit
-                    
-                    Spacer()
-                    
-                    // MARK: Notifications
-                    Button(action: {
-                        selectedTab = 3
-                    }) {
-                        VStack {
-                            Image(systemName: "bell.fill")
-                            Text("Alerts")
-                                .font(.footnote)
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    // MARK: Profile
-                    Button(action: {
-                        selectedTab = 4
-                    }) {
-                        VStack {
-                            Image(systemName: "person.crop.circle.fill")
-                            Text("Profile")
-                                .font(.footnote)
-                        }
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 30)
-                // Background for the custom tab bar
-                .background(Color(UIColor.systemGray6))
+
+            // -- Insert a custom bar at the bottom
+            .safeAreaInset(edge: .bottom) {
+                CustomBarContent(selectedTab: $selectedTab)
             }
         }
     }
 }
 
-// MARK: - Sample child views
-// Replace these with your own views
+struct CustomBarContent: View {
+    @Binding var selectedTab: Int
 
-struct QuickCaptureView: View {
     var body: some View {
-        VStack {
-            Text("QuickCaptureView")
-                .font(.largeTitle)
+        HStack {
+            // MARK: Dashboard
+            Button {
+                selectedTab = 0
+            } label: {
+                Image(systemName: "house.fill")
+            }
+
+            Spacer()
+
+            // MARK: QuickCapturesList
+            Button {
+                selectedTab = 1
+            } label: {
+                Image(systemName: "doc.text.fill")
+            }
+
+            Spacer()
+
+            // MARK: The plus button => just switch to ChatView tab
+            Button {
+                selectedTab = 2  // The Chat tab index
+            } label: {
+                Image("Rabbit_hole")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)   // or .fill as desired
+                    .frame(width: 60, height: 60)
+                    .background(Color.white.opacity(0.8))
+                    .clipShape(Circle())
+                    .shadow(radius: 5)
+            }
+            .offset(y: -10)
+
+            Spacer()
+
+            // MARK: Notifications
+            Button {
+                selectedTab = 3
+            } label: {
+                Image(systemName: "chart.bar")
+            }
+
+            Spacer()
+
+            // MARK: Social
+            Button {
+                selectedTab = 4
+            } label: {
+                Image(systemName: "person.2")
+            }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.yellow.edgesIgnoringSafeArea(.all))
+        .padding(.horizontal, 30)
+        .frame(height: 60)
+        .background(Color(UIColor.systemGray6))
     }
 }
 
-struct QuickCapturesListView: View {
-    var body: some View {
-        VStack {
-            Text("QuickCapturesListView")
-                .font(.largeTitle)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.orange.edgesIgnoringSafeArea(.all))
-    }
-}
+//// MARK: - Sample Child Views
+//struct DashboardView: View {
+//    var body: some View {
+//        VStack {
+//            Text("DashboardView")
+//                .font(.largeTitle)
+//        }
+//        .frame(maxWidth: .infinity, maxHeight: .infinity)
+//        .background(Color.yellow.edgesIgnoringSafeArea(.all))
+//    }
+//}
 
-struct NotificationsView: View {
+//struct QuickCapturesListView: View {
+//    var body: some View {
+//        VStack {
+//            Text("QuickCapturesListView")
+//                .font(.largeTitle)
+//        }
+//        .frame(maxWidth: .infinity, maxHeight: .infinity)
+//        .background(Color.orange.edgesIgnoringSafeArea(.all))
+//    }
+//}
+
+struct NotificationsView1: View {
     var body: some View {
         VStack {
             Text("NotificationsView")
@@ -152,16 +127,61 @@ struct NotificationsView: View {
     }
 }
 
-struct ProfileView: View {
+//struct SocialView: View {
+//    var body: some View {
+//        VStack {
+//            Text("SocialView")
+//                .font(.largeTitle)
+//        }
+//        .frame(maxWidth: .infinity, maxHeight: .infinity)
+//        .background(Color.purple.edgesIgnoringSafeArea(.all))
+//    }
+//}
+
+struct DailyPracticeView: View {
     var body: some View {
         VStack {
-            Text("ProfileView")
-                .font(.largeTitle)
+            Text("Daily Practice View")
+                .font(.title)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.purple.edgesIgnoringSafeArea(.all))
+        .padding()
+        .presentationDetents([.medium, .large]) // iOS 16+ optional
     }
 }
+//
+//// MARK: - ChatView from your code (unchanged)
+//struct ChatView: View {
+//    @StateObject var viewModel: ChatViewModel = ChatViewModel()
+//
+//    var body: some View {
+//        VStack {
+//            // Messages list
+//            ScrollView {
+//                LazyVStack(alignment: .leading, spacing: 12) {
+//                    ForEach(viewModel.messages) { message in
+//                        MessageBubbleView(message: message) {
+//                            viewModel.addTextToCaptures(message.content)
+//                        }
+//                    }
+//                }
+//                .padding(.horizontal)
+//            }
+//
+//            // Input area
+//            HStack {
+//                TextField("Type your message...", text: $viewModel.inputText)
+//                    .textFieldStyle(RoundedBorderTextFieldStyle())
+//
+//                Button("Send") {
+//                    viewModel.sendMessage()
+//                }
+//                .disabled(viewModel.inputText.isEmpty)
+//            }
+//            .padding()
+//        }
+//        .navigationTitle("AI Chat")
+//    }
+//}
 
 // MARK: - Preview
 struct CustomTabBarExample_Previews: PreviewProvider {

@@ -1,3 +1,11 @@
+//
+//  SocialView.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 3/13/25.
+//
+
+
 import SwiftUI
 
 struct SocialView: View {

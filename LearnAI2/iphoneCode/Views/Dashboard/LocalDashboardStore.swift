@@ -1,3 +1,11 @@
+//
+//  LocalDashboardStore.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 3/12/25.
+//
+
+
 import Foundation
 
 /// A stub for reading/writing dashboard data from local storage.

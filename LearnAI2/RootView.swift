@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct RootView: View {
-    @AppStorage("accessToken") var accessToken: String = ""
-    
+    @AppStorage("accessToken", store: UserDefaults(suiteName: "group.learnai2"))
+    var accessToken: String = ""
     var isAuthenticated: Bool {
         !accessToken.isEmpty
     }
@@ -18,7 +18,9 @@ struct RootView: View {
                     // If you have a user profile object, you could log that instead.
                 }
             #elseif os(iOS)
-            MainContentView()
+            
+//            MainContentView()
+            CustomTabBarExample()
                 .onAppear {
                     print("Authenticated on iOS. Access Token: \(accessToken)")
                     // Replace with actual user profile logging if available.

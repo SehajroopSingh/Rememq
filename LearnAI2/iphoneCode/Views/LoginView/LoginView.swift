@@ -126,8 +126,9 @@ struct LoginView: View {
     @State private var username: String = ""
     @State private var password: String = ""
     @State private var errorMessage: String = ""
-    @AppStorage("accessToken") var accessToken: String = ""
-    @AppStorage("refreshToken") var refreshToken: String = ""
+    @AppStorage("accessToken", store: UserDefaults(suiteName: "group.learnai2")) var accessToken: String = ""
+    @AppStorage("refreshToken", store: UserDefaults(suiteName: "group.learnai2")) var refreshToken: String = ""
+
 
     @State private var isAuthenticated = false  // ✅ Track login state
     @State private var navigateToSignup = false // ✅ Track signup navigation

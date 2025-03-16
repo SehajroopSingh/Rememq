@@ -39,6 +39,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let tokenString = deviceToken.map { String(format: "%02x", $0) }.joined()
         print("✅ Device Token: \(tokenString)")
         print("App Bundle ID: \(Bundle.main.bundleIdentifier ?? "Unknown")")
+        print("Share Extension Access Token:", APIService.shared.accessToken)
+        print("Share Extension Refresh Token:", APIService.shared.refreshToken)
 
     }
     
@@ -63,7 +65,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         print("📩 Push notification received in background: \(userInfo)")
         completionHandler(.newData)
+
+
     }
+    
     
     
 }

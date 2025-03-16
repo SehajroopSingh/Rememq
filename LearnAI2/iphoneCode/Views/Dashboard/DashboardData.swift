@@ -1,3 +1,11 @@
+//
+//  DashboardData.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 3/12/25.
+//
+
+
 import Foundation
 
 struct DashboardData: Codable {

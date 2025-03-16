@@ -1,3 +1,11 @@
+//
+//  ChatMessage.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 3/13/25.
+//
+
+
 import SwiftUI
 
 struct ChatMessage: Identifiable, Hashable {
@@ -21,7 +29,7 @@ class ChatViewModel: ObservableObject {
         inputText = ""  // clear the input box
 
         // Send the text to your AI model endpoint
-        let endpoint = "chat"  // Adjust to match your actual API endpoint
+        let endpoint = "/chat"  // Adjust to match your actual API endpoint
 
         let body: [String: Any] = [
             "prompt": prompt
