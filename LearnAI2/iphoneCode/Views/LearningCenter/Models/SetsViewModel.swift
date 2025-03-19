@@ -1,8 +1,17 @@
+//
+//  SetsViewModel.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 3/16/25.
+//
+import Combine
+import Foundation
+
 class SetsViewModel: ObservableObject {
     @Published var sets: [SetItem] = []
     
     func loadSets() {
-        APIService.shared.performRequest(endpoint: "sets/") { result in
+        APIService.shared.performRequest(endpoint: "organizer/sets/") { result in
             switch result {
             case .success(let data):
                 DispatchQueue.main.async {

@@ -1,9 +1,7 @@
 import SwiftUI
-
 struct AccountView: View {
     @State private var username: String = "Loading..."
     @State private var email: String = "Loading..."
-    @State private var quickCaptureCount: Int = 0
     @State private var isEditing: Bool = false
     @State private var newUsername: String = ""
     @State private var newEmail: String = ""
@@ -47,13 +45,6 @@ struct AccountView: View {
                                 .foregroundColor(.gray)
                         }
                     }
-
-                    HStack {
-                        Text("Quick Captures:")
-                        Spacer()
-                        Text("\(quickCaptureCount)")
-                            .foregroundColor(.gray)
-                    }
                 }
 
                 if isEditing {
@@ -84,9 +75,8 @@ struct AccountView: View {
         .navigationTitle("Account")
     }
 
-    // ✅ Fetch User Profile from API
     private func fetchUserProfile() {
-        APIService.shared.performRequest(endpoint: "user/profile/", method: "GET") { result in
+        APIService.shared.performRequest(endpoint: "accounts/user/profile/", method: "GET") { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let data):
@@ -94,7 +84,6 @@ struct AccountView: View {
                         let response = try JSONDecoder().decode(UserProfile.self, from: data)
                         self.username = response.username
                         self.email = response.email
-                        self.quickCaptureCount = response.quickCaptureCount
                     } catch {
                         self.errorMessage = "Failed to parse profile data."
                     }
@@ -105,7 +94,6 @@ struct AccountView: View {
         }
     }
 
-    // ✅ Update User Profile via API
     private func updateProfile() {
         let requestBody: [String: Any] = [
             "username": newUsername,
@@ -126,7 +114,6 @@ struct AccountView: View {
         }
     }
 }
-
 
 
 // MARK: - Preview

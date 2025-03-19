@@ -1,3 +1,11 @@
+//
+//  QuickCapturesView.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 3/17/25.
+//
+
+
 import SwiftUI
 
 struct QuickCapturesView: View {

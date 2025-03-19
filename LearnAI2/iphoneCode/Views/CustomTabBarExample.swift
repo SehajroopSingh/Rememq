@@ -9,7 +9,7 @@ struct CustomTabBarExample: View {
                 DashboardView()
                     .tag(0)
 
-                QuickCapturesListView()
+                SpacesView()
                     .tag(1)
 
                 // The Chat tab

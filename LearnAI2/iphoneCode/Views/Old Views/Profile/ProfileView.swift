@@ -13,11 +13,11 @@ struct ProfileView: View {
                     
                     Text("Username: \(user.username)").font(.title2)
                     Text("Email: \(user.email)").font(.title3)
-                    Text("User ID: \(user.id)").font(.footnote)
+                    //Text("User ID: \(user.id)").font(.footnote)
 
-                    Text("Quick Captures: \(user.quickCaptureCount)")
-                        .font(.headline)
-                        .foregroundColor(.blue)
+                    //Text("Quick Captures: \(user.quickCaptureCount)")
+                     //   .font(.headline)
+                     //   .foregroundColor(.blue)
                 }
                 .padding()
             } else if let error = viewModel.errorMessage {

@@ -1,14 +1,17 @@
-import SwiftUI
-import AuthenticationServices
-import SwiftUI
-import AuthenticationServices
+//import SwiftUI
+//import AuthenticationServices
+//import SwiftUI
+//import AuthenticationServices
+//import SwiftUI
+//import AuthenticationServices
 //
 //struct LoginView: View {
 //    @State private var username: String = ""
 //    @State private var password: String = ""
 //    @State private var errorMessage: String = ""
-//    @AppStorage("accessToken") var accessToken: String = ""
-//    @AppStorage("refreshToken") var refreshToken: String = ""
+//    @AppStorage("accessToken", store: UserDefaults(suiteName: "group.learnai2")) var accessToken: String = ""
+//    @AppStorage("refreshToken", store: UserDefaults(suiteName: "group.learnai2")) var refreshToken: String = ""
+//
 //
 //    @State private var isAuthenticated = false  // ✅ Track login state
 //    @State private var navigateToSignup = false // ✅ Track signup navigation
@@ -56,69 +59,37 @@ import AuthenticationServices
 //        }
 //    }
 //
+//    /// 🔄 **Updated function to use `APIService.shared`**
 //    func loginUser() {
-//        guard let url = URL(string: "https://1479-58-8-65-88.ngrok-free.app/api/token/") else {
-//            errorMessage = "Bad URL"
-//            return
-//        }
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "POST"
-//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//
 //        let body: [String: String] = ["username": username, "password": password]
-//        do {
-//            request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
-//        } catch {
-//            errorMessage = "JSON serialization error"
-//            return
-//        }
 //
-//        URLSession.shared.dataTask(with: request) { data, response, error in
-//            if let error = error {
-//                DispatchQueue.main.async {
-//                    errorMessage = "Network error: \(error.localizedDescription)"
-//                }
-//                return
-//            }
-//            guard let data = data,
-//                  let httpResponse = response as? HTTPURLResponse else {
-//                DispatchQueue.main.async {
-//                    errorMessage = "No data or invalid response"
-//                }
-//                return
-//            }
-//            if httpResponse.statusCode == 200 {
-//                do {
-//                    if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: String],
-//                       let access = json["access"], let refresh = json["refresh"] {
-//                        
-//                        DispatchQueue.main.async {
+//        APIService.shared.performRequest(endpoint: "token/", method: "POST", body: body) { result in
+//            DispatchQueue.main.async {
+//                switch result {
+//                case .success(let data):
+//                    do {
+//                        if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: String],
+//                           let access = json["access"], let refresh = json["refresh"] {
+//                            
 //                            self.accessToken = access
 //                            self.refreshToken = refresh
 //                            self.password = ""
 //                            self.errorMessage = ""
 //                            self.isAuthenticated = true  // ✅ Navigate to Home after login
+//                        } else {
+//                            self.errorMessage = "Invalid JSON response."
 //                        }
-//                    } else {
-//                        DispatchQueue.main.async {
-//                            errorMessage = "Invalid JSON response."
-//                        }
+//                    } catch {
+//                        self.errorMessage = "JSON parse error: \(error.localizedDescription)"
 //                    }
-//                } catch {
-//                    DispatchQueue.main.async {
-//                        errorMessage = "JSON parse error: \(error.localizedDescription)"
-//                    }
-//                }
-//            } else {
-//                DispatchQueue.main.async {
-//                    errorMessage = "Invalid credentials (status code: \(httpResponse.statusCode))"
+//                case .failure(let error):
+//                    self.errorMessage = "Login failed: \(error.localizedDescription)"
 //                }
 //            }
-//        }.resume()
+//        }
 //    }
 //}
-//
-//
+
 import SwiftUI
 import AuthenticationServices
 
@@ -128,7 +99,6 @@ struct LoginView: View {
     @State private var errorMessage: String = ""
     @AppStorage("accessToken", store: UserDefaults(suiteName: "group.learnai2")) var accessToken: String = ""
     @AppStorage("refreshToken", store: UserDefaults(suiteName: "group.learnai2")) var refreshToken: String = ""
-
 
     @State private var isAuthenticated = false  // ✅ Track login state
     @State private var navigateToSignup = false // ✅ Track signup navigation
@@ -166,13 +136,14 @@ struct LoginView: View {
             }
             .padding()
             
-            // ✅ Modern navigation method for iOS 16+
+            // ✅ Navigate to SignupView
             .navigationDestination(isPresented: $navigateToSignup) {
                 SignupView()
             }
-            .navigationDestination(isPresented: $isAuthenticated) {
-                MainContentView()
-            }
+        }
+        // 🔹 Redirect to CustomTabBarExample after login
+        .fullScreenCover(isPresented: $isAuthenticated) {
+            CustomTabBarExample()  // ✅ Opens without back button
         }
     }
 
@@ -192,7 +163,7 @@ struct LoginView: View {
                             self.refreshToken = refresh
                             self.password = ""
                             self.errorMessage = ""
-                            self.isAuthenticated = true  // ✅ Navigate to Home after login
+                            self.isAuthenticated = true  // ✅ Navigate to CustomTabBarExample
                         } else {
                             self.errorMessage = "Invalid JSON response."
                         }
@@ -206,7 +177,6 @@ struct LoginView: View {
         }
     }
 }
-
 
 struct AppleSignInButton: View {
     var body: some View {
@@ -268,6 +238,9 @@ struct AppleSignInButton: View {
     }
 }
 
-#Preview {
-    LoginView()
+struct LoginView_Preview: PreviewProvider {
+    static var previews: some View {
+        LoginView()
+            .previewDevice("iPhone 15 Pro") // Forces a more interactive environment
+    }
 }

@@ -1,3 +1,5 @@
+import SwiftUI
+
 struct GroupsView: View {
     let space: Space
     @StateObject private var viewModel = GroupsViewModel()
@@ -15,7 +17,7 @@ struct GroupsView: View {
         }
         .navigationTitle(space.name)
         .onAppear {
-            viewModel.loadGroups()
+            viewModel.loadGroups(for: space.id)
         }
     }
 }

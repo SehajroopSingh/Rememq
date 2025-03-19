@@ -1,14 +1,18 @@
+import Combine
+import Foundation
+
 class GroupsViewModel: ObservableObject {
     @Published var groups: [Group] = []
     
-    func loadGroups() {
-        APIService.shared.performRequest(endpoint: "groups/") { result in
+    func loadGroups(for spaceID: Int) {
+        APIService.shared.performRequest(endpoint: "organizer/groups/") { result in
             switch result {
             case .success(let data):
                 DispatchQueue.main.async {
                     do {
                         let decoded = try JSONDecoder().decode([Group].self, from: data)
-                        self.groups = decoded
+                        // Filter groups for the given space
+                        self.groups = decoded.filter { $0.space == spaceID }
                     } catch {
                         print("Decoding Groups error: \(error)")
                     }
@@ -18,4 +22,5 @@ class GroupsViewModel: ObservableObject {
             }
         }
     }
+
 }

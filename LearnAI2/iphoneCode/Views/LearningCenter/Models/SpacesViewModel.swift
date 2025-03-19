@@ -1,3 +1,11 @@
+//
+//  SpacesViewModel.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 3/16/25.
+//
+
+
 import Combine
 import SwiftUI
 
@@ -5,7 +13,7 @@ class SpacesViewModel: ObservableObject {
     @Published var spaces: [Space] = []
     
     func loadSpaces() {
-        APIService.shared.performRequest(endpoint: "spaces/") { result in
+        APIService.shared.performRequest(endpoint: "organizer/spaces/") { result in
             switch result {
             case .success(let data):
                 DispatchQueue.main.async {

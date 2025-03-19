@@ -1,3 +1,11 @@
+//
+//  SpacesView.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 3/16/25.
+//
+
+
 import SwiftUI
 
 struct SpacesView: View {

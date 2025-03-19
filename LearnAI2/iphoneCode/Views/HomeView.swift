@@ -82,7 +82,7 @@ struct MainContentView: View {
                             Label("Home", systemImage: "house.fill")
                         }
                         .tag(0)
-                    QuickCapturesListView()  // Replacing MessagesView with new view
+                    SpacesView()  // Replacing MessagesView with new view
                         .tabItem {
                             Label("Quick Captures", systemImage: "doc.text.fill")
                         }

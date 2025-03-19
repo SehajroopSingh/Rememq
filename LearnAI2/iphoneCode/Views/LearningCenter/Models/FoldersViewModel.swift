@@ -1,8 +1,17 @@
+//
+//  FoldersViewModel.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 3/16/25.
+//
+import Foundation
+
+
 class FoldersViewModel: ObservableObject {
     @Published var folders: [Folder] = []
     
     func loadFolders() {
-        APIService.shared.performRequest(endpoint: "folders/") { result in
+        APIService.shared.performRequest(endpoint: "organizer/folders/") { result in
             switch result {
             case .success(let data):
                 DispatchQueue.main.async {
