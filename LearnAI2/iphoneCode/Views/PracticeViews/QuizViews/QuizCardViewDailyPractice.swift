@@ -10,18 +10,19 @@ import SwiftUI
 
 struct QuizCardViewDailyPractice: View {
     let quiz: Quiz
+    @ObservedObject var viewModel: PracticeViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             switch quiz.quiz_type {
             case .multipleChoice:
-                MultipleChoiceView(quiz: quiz)
+                MultipleChoiceView(quiz: quiz, viewModel: viewModel)
             case .trueFalse:
-                TrueFalseView(quiz: quiz)
+                TrueFalseView(quiz: quiz, viewModel: viewModel)
             case .fillBlank:
-                FillBlankView(quiz: quiz)
+                FillBlankView(quiz: quiz, viewModel: viewModel)
             case .fillBlankWithOptions:
-                FillBlankWithOptionsView(quiz: quiz)
+                FillBlankWithOptionsView(quiz: quiz, viewModel: viewModel)
             }
         }
         .padding()

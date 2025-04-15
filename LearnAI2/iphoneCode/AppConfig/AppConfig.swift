@@ -11,8 +11,7 @@ class AppConfig {
     static let shared = AppConfig()
     
     // An enum for environment modes
-    var environment: AppEnvironment = .mock
-    
+        
     // Additional global flags or settings can go here:
     var isAnalyticsEnabled: Bool = false
     var isLoggingEnabled: Bool = true

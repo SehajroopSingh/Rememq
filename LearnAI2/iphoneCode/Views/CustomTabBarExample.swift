@@ -138,7 +138,7 @@ struct NotificationsView1: View {
 //    }
 //}
 
-struct DailyPracticeView: View {
+struct PracticeView: View {
     var body: some View {
         VStack {
             Text("Daily Practice View")

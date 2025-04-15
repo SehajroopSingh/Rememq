@@ -113,13 +113,13 @@ struct FullCaptureView: View {
     func sendThoughtToDjango(thought: String, additionalContext: String) {
         // Build the payload
         let postData: [String: Any] = [
-            "input_type": "text",
+            //"input_type": "text",
             "content": thought,
             "context": additionalContext
         ]
         
         // Use APIService to perform the request.
-        APIService.shared.performRequest(endpoint: "processor/quick_capture/", method: "POST", body: postData) { result in
+        APIService.shared.performRequest(endpoint: "quick-capture/quick_capture/", method: "POST", body: postData) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let data):

@@ -63,7 +63,7 @@ struct DashboardView: View {
                         .padding(.leading)
                     
                     // Full-width Button
-                    NavigationLink(destination: PracticeView()) {
+                    NavigationLink(destination: DailyPracticeView()) {
                         Text("Start Practice")
                             .frame(maxWidth: .infinity)
                             .padding()

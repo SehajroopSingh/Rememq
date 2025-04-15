@@ -2,8 +2,12 @@ import SwiftUI
 
 struct MultipleChoiceView: View {
     let quiz: Quiz
+    @ObservedObject var viewModel: PracticeViewModel
+
+    
     @State private var selectedIndex: Int? = nil
     @State private var showExplanation = false
+
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -16,6 +20,13 @@ struct MultipleChoiceView: View {
                 Button(action: {
                     selectedIndex = index
                     showExplanation = true
+                    let isCorrect = (index == quiz.correctAnswerIndex)
+                    viewModel.recordResponse(
+                        for: quiz,
+                        wasCorrect: isCorrect,
+                        score: isCorrect ? 1.0 : 0.0,
+                        userInput: String(index)
+                    )
                 }) {
                     HStack {
                         Text(quiz.choices?[index] ?? "")

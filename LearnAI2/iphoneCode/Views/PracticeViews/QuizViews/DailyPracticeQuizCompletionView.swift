@@ -4,9 +4,9 @@
 //
 //  Created by Sehaj Singh on 4/15/25.
 //
+import SwiftUI
 
-
-struct QuizCompletionView: View {
+struct DailyPracticeQuizCompletionView: View {
     @ObservedObject var viewModel: PracticeViewModel
     @State private var submitted = false
     @State private var submissionMessage = "Submitting..."
