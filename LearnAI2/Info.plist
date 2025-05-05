@@ -2,26 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleDocumentTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeName</key>
-			<string></string>
-			<key>LSHandlerRank</key>
-			<string>Owner</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>public.image</string>
-				<string>public.plain-text</string>
-			</array>
-		</dict>
-		<dict>
-			<key>CFBundleTypeName</key>
-			<string></string>
-			<key>LSHandlerRank</key>
-			<string>Default</string>
-		</dict>
-	</array>
+	<key>CFBundleIdentifier</key>
+	<string>com.LearnAI2</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon1</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>&quot;We need access to your microphone to record your voice notes.&quot;</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>NSServices</key>
 	<array>
 		<dict/>

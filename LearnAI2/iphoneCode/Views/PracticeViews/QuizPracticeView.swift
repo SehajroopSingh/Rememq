@@ -58,6 +58,8 @@ struct QuizPracticeView: View {
     @StateObject private var viewModel = PracticeViewModel()
 
     var body: some View {
+        // 🫀 Heart display
+
         VStack {
             if viewModel.isLoading {
                 ProgressView("Loading Quizzes...")
@@ -67,8 +69,18 @@ struct QuizPracticeView: View {
                 DailyPracticeQuizCompletionView(viewModel: viewModel)
             } else if viewModel.quizzes.isEmpty {
                 Text("No quizzes found.")
+            }
+            else if viewModel.remainingHearts == 0 {
+                DailyPracticeOutOfHeartsView()
             } else {
                 let quiz = viewModel.quizzes[viewModel.currentIndex]
+                HStack(spacing: 4) {
+                    ForEach(0..<viewModel.startingHearts, id: \.self) { index in
+                        Image(systemName: index < viewModel.remainingHearts ? "heart.fill" : "heart")
+                            .foregroundColor(.red)
+                    }
+                }
+                .padding(.bottom, 4)
                 QuizCardViewDailyPractice(quiz: quiz, viewModel: viewModel)
                     .id(quiz.id)
                     .environmentObject(viewModel)

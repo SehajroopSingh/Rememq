@@ -59,7 +59,7 @@ class DashboardViewModel: ObservableObject {
     
     // MARK: - Private: Fetch from API
     private func fetchFromAPI(completion: @escaping (Result<DashboardData, Error>) -> Void) {
-        APIService.shared.performRequest(endpoint: "dashboard/", method: "GET") { result in
+        APIService.shared.performRequest(endpoint: "user-interface/dashboard/", method: "GET") { result in
             switch result {
             case .success(let data):
                 // 1) Print raw JSON for debugging

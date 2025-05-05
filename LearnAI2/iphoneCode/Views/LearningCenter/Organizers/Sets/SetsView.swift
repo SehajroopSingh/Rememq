@@ -1,54 +1,313 @@
+//import SwiftUI
+//
+//struct SetsView: View {
+//    let group: Group
+//    @State private var showCreateSetSheet = false
+//
+//    var body: some View {
+//        ScrollView {
+//            LazyVStack(spacing: 20) {
+//                ForEach(group.sets) { set in
+//                    NavigationLink(destination: QuickCapturesView(set: set)) {
+//                        SetCardView(set: set)
+//                    }
+//                    .buttonStyle(PlainButtonStyle())
+//                }
+//            }
+//            .padding()
+//        }
+//        .navigationTitle(group.name)
+//        .navigationBarTitleDisplayMode(.inline)
+//        .toolbar {
+//            ToolbarItem(placement: .navigationBarTrailing) {
+//                Button(action: {
+//                    showCreateSetSheet = true
+//                }) {
+//                    Image(systemName: "plus")
+//                }
+//                .accessibilityLabel("Create New Set")
+//            }
+//        }
+//        .sheet(isPresented: $showCreateSetSheet) {
+//            CreateSetView(group: group)
+//        }
+//    }
+//}
+//
+//struct SetCardView: View {
+//    let set: SetItem
+//    @State private var isEditing = false
+//    @State private var title: String
+//    @State private var userFacingDescription: String
+//    @State private var llmDescription: String
+//
+//    init(set: SetItem) {
+//        self.set = set
+//        _title = State(initialValue: set.title)
+//        _userFacingDescription = State(initialValue: set.userFacingDescription ?? "")
+//        _llmDescription = State(initialValue: set.llmDescription ?? "")
+//    }
+//
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 8) {
+//            if isEditing {
+//                TextField("Set Title", text: $title)
+//                    .textFieldStyle(RoundedBorderTextFieldStyle())
+//
+//                TextField("User Description", text: $userFacingDescription)
+//                    .textFieldStyle(RoundedBorderTextFieldStyle())
+//
+//                TextField("LLM Description", text: $llmDescription)
+//                    .textFieldStyle(RoundedBorderTextFieldStyle())
+//
+//                HStack {
+//                    Button("Save") {
+//                        updateSet()
+//                    }
+//                    .buttonStyle(.borderedProminent)
+//
+//                    Button("Cancel") {
+//                        cancelEdit()
+//                    }
+//                    .buttonStyle(.bordered)
+//                    .tint(.red)
+//                }
+//                .padding(.top, 6)
+//            } else {
+//                HStack(alignment: .top) {
+//                    VStack(alignment: .leading, spacing: 6) {
+//                        Text(title)
+//                            .font(.headline)
+//
+//                        Text(userFacingDescription.isEmpty ? "No user-facing description" : userFacingDescription)
+//                            .font(.subheadline)
+//                            .foregroundColor(userFacingDescription.isEmpty ? .gray : .secondary)
+//
+//                        Text(llmDescription.isEmpty ? "No LLM description" : llmDescription)
+//                            .font(.caption)
+//                            .foregroundColor(llmDescription.isEmpty ? .gray.opacity(0.6) : .gray)
+//                    }
+//                    Spacer()
+//                    Menu {
+//                        Button("Edit Set") {
+//                            isEditing = true
+//                        }
+//                        Divider()
+//                        Button("Delete Set", role: .destructive) {
+//                            print("Delete Set tapped")
+//                        }
+//                    } label: {
+//                        Image(systemName: "ellipsis")
+//                            .rotationEffect(.degrees(90))
+//                            .frame(width: 30, height: 30)
+//                            .contentShape(Rectangle())
+//                            .padding(.leading, 8)
+//                    }
+//                    .menuStyle(.button)
+//                }
+//            }
+//        }
+//        .padding()
+//        .frame(maxWidth: .infinity, alignment: .leading)
+//        .background(Color(.systemGray5))
+//        .cornerRadius(12)
+//        .shadow(radius: 2)
+//        .padding(.horizontal)
+//    }
+//
+//    func updateSet() {
+//        let payload: [String: Any] = [
+//            "id": set.id,
+//            "title": title,
+//            "user_facing_description": userFacingDescription,
+//            "llm_description": llmDescription,
+//            "mastery_time": set.masteryTime,
+//            "group": set.group
+//        ]
+//
+//        APIService.shared.performRequest(endpoint: "organizer/sets/\(set.id)/", method: "PUT", body: payload) { result in
+//            DispatchQueue.main.async {
+//                switch result {
+//                case .success:
+//                    print("✅ Set updated successfully")
+//                    isEditing = false
+//                case .failure(let error):
+//                    print("❌ Failed to update set: \(error.localizedDescription)")
+//                }
+//            }
+//        }
+//    }
+//
+//    func cancelEdit() {
+//        title = set.title
+//        userFacingDescription = set.userFacingDescription ?? ""
+//        llmDescription = set.llmDescription ?? ""
+//        isEditing = false
+//    }
+//}
 import SwiftUI
 
 struct SetsView: View {
     let group: Group
-    @StateObject private var viewModel = SetsViewModel()
     @State private var showCreateSetSheet = false
-
-    let columns = [
-        GridItem(.flexible()),
-        GridItem(.flexible())
-    ]
 
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: 16) {
-                
-                // "New Set" card
-                Button(action: {
-                    showCreateSetSheet = true
-                }) {
-                    ZStack {
-                        Color.purple
-                            .cornerRadius(10)
-                            .shadow(radius: 5)
-                        VStack {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 30))
-                            Text("New Set")
-                                .font(.headline)
-                        }
-                        .foregroundColor(.white)
-                        .padding()
-                    }
-                    .aspectRatio(1, contentMode: .fit)
-                }
-
-                // Set cards
-                ForEach(viewModel.sets.filter { $0.group == group.id }) { set in
+            LazyVStack(spacing: 20) {
+                ForEach(group.sets) { set in
                     NavigationLink(destination: QuickCapturesView(set: set)) {
-                        CardView(title: set.title)
+                        SetCardView(set: set)
                     }
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
             .padding()
         }
         .navigationTitle(group.name)
-        .onAppear {
-            viewModel.loadSets()
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    showCreateSetSheet = true
+                }) {
+                    Image(systemName: "plus")
+                }
+                .accessibilityLabel("Create New Set")
+            }
         }
         .sheet(isPresented: $showCreateSetSheet) {
-            CreateSetView(group: group)  // Placeholder view below
+            CreateSetView(group: group)
         }
+    }
+}
+
+struct SetCardView: View {
+    let set: SetItem
+    @State private var isEditing = false
+    @State private var title: String
+    @State private var userFacingDescription: String
+    @State private var llmDescription: String
+    @State private var masteryTime: String
+
+    private let masteryOptions = [
+        "3 days", "1 week", "2 weeks", "3 weeks",
+        "1 month", "3 months", "1 year", "indefinitely"
+    ]
+
+    init(set: SetItem) {
+        self.set = set
+        _title = State(initialValue: set.title)
+        _userFacingDescription = State(initialValue: set.userFacingDescription ?? "")
+        _llmDescription = State(initialValue: set.llmDescription ?? "")
+        _masteryTime = State(initialValue: set.masteryTime)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if isEditing {
+                TextField("Set Title", text: $title)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                TextField("User Description", text: $userFacingDescription)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                TextField("LLM Description", text: $llmDescription)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                Picker("Mastery Time", selection: $masteryTime) {
+                    ForEach(masteryOptions, id: \.self) { option in
+                        Text(option.capitalized).tag(option)
+                    }
+                }
+                .pickerStyle(MenuPickerStyle())
+
+                HStack {
+                    Button("Save") {
+                        updateSet()
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Button("Cancel") {
+                        cancelEdit()
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.red)
+                }
+                .padding(.top, 6)
+            } else {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(title)
+                            .font(.headline)
+
+                        Text(userFacingDescription.isEmpty ? "No user-facing description" : userFacingDescription)
+                            .font(.subheadline)
+                            .foregroundColor(userFacingDescription.isEmpty ? .gray : .secondary)
+
+                        Text(llmDescription.isEmpty ? "No LLM description" : llmDescription)
+                            .font(.caption)
+                            .foregroundColor(llmDescription.isEmpty ? .gray.opacity(0.6) : .gray)
+
+                        Text("Mastery Time: \(masteryTime)")
+                            .font(.caption2)
+                            .foregroundColor(.blue)
+                    }
+                    Spacer()
+                    Menu {
+                        Button("Edit Set") {
+                            isEditing = true
+                        }
+                        Divider()
+                        Button("Delete Set", role: .destructive) {
+                            print("Delete Set tapped")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .rotationEffect(.degrees(90))
+                            .frame(width: 30, height: 30)
+                            .contentShape(Rectangle())
+                            .padding(.leading, 8)
+                    }
+                    .menuStyle(.button)
+                }
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.systemGray5))
+        .cornerRadius(12)
+        .shadow(radius: 2)
+        .padding(.horizontal)
+    }
+
+    func updateSet() {
+        let payload: [String: Any] = [
+            "id": set.id,
+            "title": title,
+            "user_facing_description": userFacingDescription,
+            "llm_description": llmDescription,
+            "mastery_time": masteryTime,
+            "group": set.group
+        ]
+
+        APIService.shared.performRequest(endpoint: "organizer/sets/\(set.id)/", method: "PUT", body: payload) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    print("✅ Set updated successfully")
+                    isEditing = false
+                case .failure(let error):
+                    print("❌ Failed to update set: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
+    func cancelEdit() {
+        title = set.title
+        userFacingDescription = set.userFacingDescription ?? ""
+        llmDescription = set.llmDescription ?? ""
+        masteryTime = set.masteryTime
+        isEditing = false
     }
 }

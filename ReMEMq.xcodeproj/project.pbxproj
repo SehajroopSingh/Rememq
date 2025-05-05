@@ -11,7 +11,6 @@
 		1E4E641A2D8025CF00085C5E /* SharedAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E4E64052D8025CF00085C5E /* SharedAPI.framework */; };
 		1E4E641B2D8025CF00085C5E /* SharedAPI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1E4E64052D8025CF00085C5E /* SharedAPI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1E4E64262D80267600085C5E /* SharedAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E4E64052D8025CF00085C5E /* SharedAPI.framework */; };
-		1E4E64272D80267600085C5E /* SharedAPI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1E4E64052D8025CF00085C5E /* SharedAPI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1EAF310F2D3ADC4B00C4AA52 /* MyAppShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1EAF31052D3ADC4A00C4AA52 /* MyAppShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -85,7 +84,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				1E4E64272D80267600085C5E /* SharedAPI.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -663,7 +661,7 @@
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
-				PRODUCT_BUNDLE_IDENTIFIER = com.SharedAPI;
+				PRODUCT_BUNDLE_IDENTIFIER = com.LearnAI2.SharedAPI;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -701,7 +699,7 @@
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
-				PRODUCT_BUNDLE_IDENTIFIER = com.SharedAPI;
+				PRODUCT_BUNDLE_IDENTIFIER = com.LearnAI2.SharedAPI;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -724,7 +722,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.SharedAPITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.LearnAI2.SharedAPITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -743,7 +741,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.SharedAPITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.LearnAI2.SharedAPITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -1059,7 +1057,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.LearnAI2.extension;
+				PRODUCT_BUNDLE_IDENTIFIER = com.LearnAI2.ShareExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -1087,7 +1085,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.LearnAI2.extension;
+				PRODUCT_BUNDLE_IDENTIFIER = com.LearnAI2.ShareExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;

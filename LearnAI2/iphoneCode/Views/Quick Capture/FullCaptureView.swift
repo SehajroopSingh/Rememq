@@ -1,3 +1,11 @@
+//
+//  FullCaptureView.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 4/20/25.
+//
+
+
 import SwiftUI
 
 /// A full‑screen sheet for capturing a thought and filing it under
@@ -50,31 +58,53 @@ struct FullCaptureView: View {
 
     // MARK: ‑ Sections
     private var pickersSection: some View {
+        // --- inside pickersSection ---
         SwiftUI.Group {
-            // Space Picker
-            Picker("Select a Space", selection: $selectedSpace) {
-                ForEach(spaces) { space in
-                    Text(space.name).tag(Optional(space))
+            if spaces.isEmpty {
+                ProgressView("Loading spaces…")
+            } else {
+                // Space Picker
+                Picker("Space", selection: $selectedSpace) {
+                    ForEach(spaces) { space in
+                        Text(space.name).tag(Optional(space))
+                    }
                 }
-            }
+                .pickerStyle(.menu)
+                
+                // --- Group Picker (shows loader or "none") ---
+                if selectedSpace == nil {
+                    Text("Select a space first").foregroundColor(.secondary)
+                } else if groups.isEmpty {
+                    ProgressView("Loading groups…")
+                        .padding(.vertical, 4)
+                } else {
+                    Picker("Group", selection: $selectedGroup) {
+                        ForEach(groups) { group in
+                            Text(group.name).tag(Optional(group))
+                        }
+                    }
+                    .pickerStyle(.menu)
+                }
 
-            // Group Picker (enabled after space)
-            Picker("Select a Group", selection: $selectedGroup) {
-                ForEach(groups) { group in
-                    Text(group.name).tag(Optional(group))
+                
+                if selectedGroup == nil {
+                    Text("Select a group first")
+                        .foregroundColor(.secondary)
+                } else if sets.isEmpty {
+                    ProgressView("Loading sets…")
+                        .padding(.vertical, 4)
+                } else {
+                    Picker("Set", selection: $selectedSet) {
+                        ForEach(sets) { set in
+                            Text(set.title).tag(Optional(set))
+                        }
+                    }
+                    .pickerStyle(.menu)
                 }
             }
-            .disabled(selectedSpace == nil)
-
-            // Set Picker (enabled after group)
-            Picker("Select a Set", selection: $selectedSet) {
-                ForEach(sets) { set in
-                    Text(set.title).tag(Optional(set))
-                }
-            }
-            .disabled(selectedGroup == nil)
         }
     }
+
 
     private var textFieldsSection: some View {
         SwiftUI.Group {
@@ -142,6 +172,8 @@ struct FullCaptureView: View {
             "context": additionalContext
         ]
         if let set = selectedSet { payload["set"] = set.id }
+        
+        print("🚀 Sending payload:", payload)
 
         APIService.shared.performRequest(
             endpoint: "quick-capture/quick_capture/",

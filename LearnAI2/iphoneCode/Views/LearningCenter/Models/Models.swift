@@ -1,19 +1,66 @@
-struct Space: Codable, Identifiable {
-    let id: Int
-    let name: String
-}
-
-struct Group: Codable, Identifiable {
-    let id: Int
-    let name: String
-    let space: Int?  // space id
-}
-
-struct SetItem: Codable, Identifiable { // "Set" is a reserved word in Swift.
+//struct Space:   Codable, Identifiable, Equatable, Hashable {
+//    let id: Int
+//    let name: String
+//}
+//
+//struct Group:   Codable, Identifiable, Equatable, Hashable {
+//    let id: Int
+//    let name: String
+//    let space: Int
+//}
+//
+//struct SetItem: Codable, Identifiable, Equatable, Hashable {
+//    let id: Int
+//    let title: String
+//    let group: Int
+//}
+struct SetItem: Codable, Identifiable, Equatable, Hashable {
     let id: Int
     let title: String
-    let group: Int  // group id
+    let userFacingDescription: String?
+    let llmDescription: String?
+    let masteryTime: String
+    let group: Int
+
+    enum CodingKeys: String, CodingKey {
+        case id, title
+        case userFacingDescription = "user_facing_description"
+        case llmDescription = "llm_description"
+        case masteryTime = "mastery_time"
+        case group
+    }
 }
+
+struct Group: Codable, Identifiable, Equatable, Hashable {
+    let id: Int
+    let name: String
+    let userFacingDescription: String?
+    let llmDescription: String?
+    let image: String?
+    let space: Int
+    let sets: [SetItem]
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, image, sets, space
+        case userFacingDescription = "user_facing_description"
+        case llmDescription = "llm_description"
+    }
+}
+
+struct Space: Codable, Identifiable, Equatable, Hashable {
+    let id: Int
+    let name: String
+    let userFacingDescription: String?
+    let llmDescription: String?
+    let groups: [Group]
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, groups
+        case userFacingDescription = "user_facing_description"
+        case llmDescription = "llm_description"
+    }
+}
+
 
 struct Folder: Codable, Identifiable {
     let id: Int
@@ -30,7 +77,12 @@ struct QuickCaptureModel: Identifiable, Codable {
     let masteryTime: String
     let depthOfLearning: String
     let createdAt: String
-    
+    let updatedAt: String?
+    let shortDescription: String?
+    let classification: String?
+    let set: Int?
+    let folder: Int?
+
     enum CodingKeys: String, CodingKey {
         case id
         case content
@@ -39,5 +91,10 @@ struct QuickCaptureModel: Identifiable, Codable {
         case masteryTime = "mastery_time"
         case depthOfLearning = "depth_of_learning"
         case createdAt = "created_at"
+        case updatedAt = "updated_at"
+        case shortDescription = "short_description"
+        case classification
+        case set
+        case folder
     }
 }

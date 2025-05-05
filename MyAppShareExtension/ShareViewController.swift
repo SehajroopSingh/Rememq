@@ -5,17 +5,17 @@ import MobileCoreServices
 import UniformTypeIdentifiers
 import SharedAPI
 
-class ShareViewController: SLComposeServiceViewController {
+class ShareViewController: SLComposeServiceViewController, UIPickerViewDataSource, UIPickerViewDelegate {
     
     // Shared Data
     var sharedText: String?
     var sharedURL: URL?
     var sharedImage: UIImage?
     
-    var availableSets: [String] = []
+    //var availableSets: [String] = []
     var availableFolders: [String] = []
     
-    var selectedSet: String?
+    //var selectedSet: String?
     var selectedFolder: String?
     
     // User-selected options
@@ -23,6 +23,23 @@ class ShareViewController: SLComposeServiceViewController {
     var folderName: String? = nil  // ✅ Name of the selected folder
     var depthOfLearning: String? = "normal"  // ✅ Default to "normal"
     var highlightedSections: [String] = []  // ✅ Default to empty array
+    
+    
+    // Remote data
+    var availableSpaces:  [Space]   = []
+    var availableGroups:  [Group]   = []
+    var availableSets:    [SetItem] = []
+
+    // Pickers
+    let spacePicker  = UIPickerView()
+    let groupPicker  = UIPickerView()
+    let setPicker    = UIPickerView()
+
+    // Current selections
+    var selectedSpace: Space?
+    var selectedGroup: Group?
+    var selectedSet:   SetItem?
+
     
     
     // Enum to track content type
@@ -45,7 +62,7 @@ class ShareViewController: SLComposeServiceViewController {
     
     
     // ✅ Dropdowns for Set & Folder selection
-    let setPicker = UIPickerView()
+    //let setPicker = UIPickerView()
     let folderPicker = UIPickerView()
     
     
@@ -62,8 +79,23 @@ class ShareViewController: SLComposeServiceViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         handleSharedItems()
+        
+        spacePicker.dataSource = self
+        spacePicker.delegate   = self
+        groupPicker.dataSource = self
+        groupPicker.delegate   = self
+        setPicker.dataSource   = self
+        setPicker.delegate     = self
+
+        // Give the pickers a height so they don’t collapse
+        [ spacePicker, groupPicker, setPicker ].forEach { picker in
+            picker.translatesAutoresizingMaskIntoConstraints = false
+            picker.heightAnchor.constraint(equalToConstant: 120).isActive = true
+        }
+
+        fetchSpaces()
     }
-    
+
     // Try to force a larger size (iOS may still limit it)
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -74,41 +106,41 @@ class ShareViewController: SLComposeServiceViewController {
         return true  // Always enable the Post button
     }
 
-    // ✅ Fetch available Sets & Folders from API
-    private func fetchAvailableSetsAndFolders() {
-        let setsEndpoint = "quick-capture/available-sets/"
-        let foldersEndpoint = "quick-capture/available-folders/"
-        
-        APIService.shared.performRequest(endpoint: setsEndpoint, method: "GET", body: nil) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                switch result {
-                case .success(let data):
-                    if let setList = try? JSONDecoder().decode([String].self, from: data) {
-                        self.availableSets = setList
-                        self.setPicker.reloadAllComponents()
-                    }
-                case .failure(let error):
-                    print("❌ Error fetching sets: \(error.localizedDescription)")
-                }
-            }
-        }
-        
-        APIService.shared.performRequest(endpoint: foldersEndpoint, method: "GET", body: nil) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                switch result {
-                case .success(let data):
-                    if let folderList = try? JSONDecoder().decode([String].self, from: data) {
-                        self.availableFolders = folderList
-                        self.folderPicker.reloadAllComponents()
-                    }
-                case .failure(let error):
-                    print("❌ Error fetching folders: \(error.localizedDescription)")
-                }
-            }
-        }
-    }
+//    // ✅ Fetch available Sets & Folders from API
+//    private func fetchAvailableSetsAndFolders() {
+//        let setsEndpoint = "quick-capture/available-sets/"
+//        let foldersEndpoint = "quick-capture/available-folders/"
+//        
+//        APIService.shared.performRequest(endpoint: setsEndpoint, method: "GET", body: nil) { [weak self] result in
+//            DispatchQueue.main.async {
+//                guard let self = self else { return }
+//                switch result {
+//                case .success(let data):
+//                    if let setList = try? JSONDecoder().decode([String].self, from: data) {
+//                        self.availableSets = setList
+//                        self.setPicker.reloadAllComponents()
+//                    }
+//                case .failure(let error):
+//                    print("❌ Error fetching sets: \(error.localizedDescription)")
+//                }
+//            }
+//        }
+//        
+//        APIService.shared.performRequest(endpoint: foldersEndpoint, method: "GET", body: nil) { [weak self] result in
+//            DispatchQueue.main.async {
+//                guard let self = self else { return }
+//                switch result {
+//                case .success(let data):
+//                    if let folderList = try? JSONDecoder().decode([String].self, from: data) {
+//                        self.availableFolders = folderList
+//                        self.folderPicker.reloadAllComponents()
+//                    }
+//                case .failure(let error):
+//                    print("❌ Error fetching folders: \(error.localizedDescription)")
+//                }
+//            }
+//        }
+//    }
     // Handles shared items and determines content type
     private func handleSharedItems() {
         guard let extensionItem = extensionContext?.inputItems.first as? NSExtensionItem,
@@ -224,7 +256,10 @@ class ShareViewController: SLComposeServiceViewController {
             stackView.addArrangedSubview(label)
         }
         
-        
+        stackView.addArrangedSubview(spacePicker)
+        stackView.addArrangedSubview(groupPicker)
+        stackView.addArrangedSubview(setPicker)
+
         
         // ✅ Add Custom "Post" Button
         let postButton = UIButton(type: .system)
@@ -242,6 +277,7 @@ class ShareViewController: SLComposeServiceViewController {
         stackView.alignment = .fill
         stackView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(stackView)
+        fetchSpaces()
 
         NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 20),
@@ -352,7 +388,89 @@ class ShareViewController: SLComposeServiceViewController {
             }
         }
     }
+    
+    
+    // MARK: - Picker DataSource
+    func numberOfComponents(in pickerView: UIPickerView) -> Int { 1 }
 
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        switch pickerView {
+        case spacePicker: return availableSpaces.count
+        case groupPicker: return availableGroups.count
+        case setPicker:   return availableSets.count
+        default: return 0
+        }
+    }
+
+    // MARK: - Picker Delegate
+    func pickerView(_ pickerView: UIPickerView,
+                    titleForRow row: Int, forComponent component: Int) -> String? {
+        switch pickerView {
+        case spacePicker: return availableSpaces[row].name
+        case groupPicker: return availableGroups[row].name
+        case setPicker:   return availableSets[row].title
+        default: return nil
+        }
+    }
+
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent comp: Int) {
+        switch pickerView {
+        case spacePicker:
+            selectedSpace  = availableSpaces[row]
+            selectedGroup  = nil; availableGroups.removeAll()
+            selectedSet    = nil; availableSets.removeAll()
+            groupPicker.reloadAllComponents(); setPicker.reloadAllComponents()
+            if let spaceID = selectedSpace?.id { fetchGroups(for: spaceID) }
+        case groupPicker:
+            selectedGroup = availableGroups[row]
+            selectedSet   = nil; availableSets.removeAll()
+            setPicker.reloadAllComponents()
+            if let groupID = selectedGroup?.id { fetchSets(for: groupID) }
+        case setPicker:
+            selectedSet = availableSets[row]
+        default:
+            break
+        }
+    }
+    
+    
+    private func fetchSpaces() {
+        APIService.shared.performRequest(endpoint:"organizer/spaces/") { [weak self] res in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                if case let .success(data) = res {
+                    self.availableSpaces = (try? JSONDecoder().decode([Space].self, from: data)) ?? []
+                    self.spacePicker.reloadAllComponents()
+                }
+            }
+        }
+    }
+
+    private func fetchGroups(for spaceID: Int) {
+        APIService.shared.performRequest(endpoint:"organizer/groups/") { [weak self] res in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                if case let .success(data) = res {
+                    let all = (try? JSONDecoder().decode([Group].self, from: data)) ?? []
+                    self.availableGroups = all.filter { $0.space == spaceID }
+                    self.groupPicker.reloadAllComponents()
+                }
+            }
+        }
+    }
+
+    private func fetchSets(for groupID: Int) {
+        APIService.shared.performRequest(endpoint:"organizer/sets/") { [weak self] res in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                if case let .success(data) = res {
+                    let all = (try? JSONDecoder().decode([SetItem].self, from: data)) ?? []
+                    self.availableSets = all.filter { $0.group == groupID }
+                    self.setPicker.reloadAllComponents()
+                }
+            }
+        }
+    }
 
 
     private func uploadUIImageToDjango(_ image: UIImage, userNote: String?, difficulty: String) {
@@ -471,3 +589,9 @@ extension ShareViewController {
 
 
 
+
+
+
+struct Space:   Codable, Identifiable { let id: Int; let name: String }
+struct Group:   Codable, Identifiable { let id: Int; let name: String; let space: Int }
+struct SetItem: Codable, Identifiable { let id: Int; let title: String; let group: Int }

@@ -18,7 +18,9 @@ public class APIService: ObservableObject {
         set { sharedDefaults?.setValue(newValue, forKey: "refreshToken") }
     }
 
-    private let baseURL = "https://f505-2404-8000-1006-76db-7d2f-fcdd-e0c8-d075.ngrok-free.app/api/"
+    private let baseURL = "https://6ef6-172-89-160-207.ngrok-free.app/api/"
+    //private let baseURL = "http://rememq-backend-env.eba-rwgrpkku.us-west-2.elasticbeanstalk.com/api/"
+
     
     public func performRequest(endpoint: String, method: String = "GET", body: [String: Any]? = nil, completion: @escaping (Result<Data, Error>) -> Void) {
         guard let url = URL(string: baseURL + endpoint) else {

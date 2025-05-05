@@ -7,6 +7,9 @@ class PracticeViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var sessionID: String?
+    @Published var startingHearts: Int = 5  // Default to 3, will be updated by backend
+    @Published var remainingHearts: Int = 3
+
     
     // ✅ Store user answers here
     @Published var submittedResults: [Int: QuizResult] = [:]  // key = quiz_id
@@ -38,6 +41,9 @@ class PracticeViewModel: ObservableObject {
                         self?.quizzes = response.quizzes
                         self?.sessionID = response.session_id
                         self?.currentIndex = 0
+                        self?.startingHearts = response.starting_hearts ?? 5
+                        self?.remainingHearts = response.starting_hearts ?? 5
+
                         print("✅ Successfully parsed \(response.quizzes.count) quizzes")
 
                     } catch {
@@ -47,6 +53,45 @@ class PracticeViewModel: ObservableObject {
 
                 case .failure(let error):
                     print("❌ API error: \(error)")
+                    self?.errorMessage = "API Error: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    
+    func loadQuizzesFromSet(setId: Int, limit: Int = 10) {
+        isLoading = true
+        errorMessage = nil
+
+        let endpoint = "scheduler/sets/\(setId)/practice/?limit=\(limit)"
+        APIService.shared.performRequest(endpoint: endpoint) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+
+                switch result {
+                case .success(let data):
+                    do {
+                        let rawString = String(data: data, encoding: .utf8) ?? "Unable to decode to string"
+                        print("📥 Raw JSON:\n\(rawString)")
+
+                        let decoder = JSONDecoder()
+                        let response = try decoder.decode(QuizResponse.self, from: data)
+                        self?.quizzes = response.quizzes
+                        self?.sessionID = response.session_id
+                        self?.currentIndex = 0
+                        self?.startingHearts = response.starting_hearts ?? 5
+                        self?.remainingHearts = response.starting_hearts ?? 5
+
+                        print("✅ Successfully parsed \(response.quizzes.count) quizzes (set practice)")
+
+                    } catch {
+                        print("❌ Decoding error (set practice): \(error)")
+                        self?.errorMessage = "Failed to parse quizzes: \(error.localizedDescription)"
+                    }
+
+                case .failure(let error):
+                    print("❌ API error (set practice): \(error)")
                     self?.errorMessage = "API Error: \(error.localizedDescription)"
                 }
             }
@@ -91,7 +136,10 @@ class PracticeViewModel: ObservableObject {
             score: score,
             response_data: responseData
         )
-
+        // Subtract heart if incorrect and not already submitted
+        if submittedResults[quiz.id] == nil && !wasCorrect {
+            remainingHearts = max(0, remainingHearts - 1)
+        }
         submittedResults[quiz.id] = result
     }
     
@@ -138,8 +186,11 @@ class PracticeViewModel: ObservableObject {
 
 // Matches the API JSON response format: { "quizzes": [ ... ] }
 private struct QuizResponse: Codable {
+    
     let session_id: String
     let quizzes: [Quiz]
+    let starting_hearts: Int?  // ← Add this (optional in case backend doesn’t return it yet)
+
 }
 
 

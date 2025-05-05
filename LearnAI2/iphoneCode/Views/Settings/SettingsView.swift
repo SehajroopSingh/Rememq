@@ -1,3 +1,11 @@
+//
+//  SettingsView.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 5/4/25.
+//
+
+
 import SwiftUI
 
 struct SettingsView: View {

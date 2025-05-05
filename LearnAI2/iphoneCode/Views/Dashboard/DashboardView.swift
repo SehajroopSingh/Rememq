@@ -5,7 +5,6 @@ struct DashboardView: View {
     @State private var isProfileMenuOpen = false // Controls profile menu visibility
     
     var body: some View {
-        NavigationView {  // ✅ Wrapped in NavigationView
             ZStack {
                 // Main Dashboard (Shifts left when menu is open)
                 VStack {
@@ -90,7 +89,7 @@ struct DashboardView: View {
                     ProfileMenuView(isOpen: $isProfileMenuOpen)
                 }
             }
-        }
+        
     }
 }
 
@@ -132,7 +131,7 @@ struct ProfileMenuView: View {
                         .padding()
                 }
                 
-                Button(action: { print("Settings tapped") }) {
+                NavigationLink(destination: SettingsView()) {
                     Text("Settings").padding()
                 }
                 

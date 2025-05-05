@@ -33,16 +33,6 @@ struct HomeView: View {
 
 
 
-// Define the third view
-struct SettingsView: View {
-    var body: some View {
-        VStack {
-            Text("Settings")
-                .font(.largeTitle)
-                .padding()
-        }
-    }
-}
 
 // Define the fourth view
 struct NotificationsView: View {

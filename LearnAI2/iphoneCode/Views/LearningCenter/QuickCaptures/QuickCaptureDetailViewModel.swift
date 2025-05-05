@@ -1,37 +1,68 @@
-//
-//  QuickCaptureDetailViewModel.swift
-//  ReMEMq
-//
-//  Created by Sehaj Singh on 4/21/25.
-//
-
 
 import Foundation
 import Combine
 
 class QuickCaptureDetailViewModel: ObservableObject {
-    @Published var quizzes: [Quiz] = []
+    @Published var directQuizzes: [Quiz] = []
+    @Published var mainPointsWithQuizzes: [MainPointWithQuizzes] = []
     @Published var errorMessage: String?
-    
+
     private var cancellables = Set<AnyCancellable>()
-    
+
     func loadQuizzes(for qcID: Int) {
-        guard let token = /* pull your auth token */ nil else { return }
-        let url = URL(string: "https://your.api.server/api/quickcaptures/\(qcID)/quizzes/")!
-        var req = URLRequest(url: url)
-        req.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        URLSession.shared.dataTaskPublisher(for: req)
-            .map(\.data)
-            .decode(type: [Quiz].self, decoder: JSONDecoder())
-            .receive(on: DispatchQueue.main)
-            .sink { completion in
-                if case let .failure(error) = completion {
-                    self.errorMessage = error.localizedDescription
+        let endpoint = "organizer/quickcaptures/\(qcID)/mainpoints_and_quizzes/"
+
+        APIService.shared.performRequest(endpoint: endpoint) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let data):
+                    if let raw = String(data: data, encoding: .utf8) {
+                        print("🧾 Raw response: \(raw)")  // 👈 Add this line
+                    }
+                    do {
+                        let decoder = JSONDecoder()
+                        let response = try decoder.decode(QuickCaptureQuizResponse.self, from: data)
+                        self?.directQuizzes = response.directQuizzes
+                        self?.mainPointsWithQuizzes = response.mainPoints
+                        print("✅ Loaded \(response.directQuizzes.count) direct quizzes")
+                        print("✅ Loaded \(response.mainPoints.count) main points with quizzes")
+
+                    } catch {
+                        print("❌ Decoding error: \(error)")
+                        self?.errorMessage = "Failed to parse quizzes: \(error.localizedDescription)"
+                    }
+
+                case .failure(let error):
+                    print("❌ API error: \(error)")
+                    self?.errorMessage = "API Error: \(error.localizedDescription)"
                 }
-            } receiveValue: { quizzes in
-                self.quizzes = quizzes
             }
-            .store(in: &cancellables)
+        }
     }
 }
+
+
+
+struct QuickCaptureQuizResponse: Codable {
+    let quickCaptureId: Int
+    let directQuizzes: [Quiz]
+    let mainPoints: [MainPointWithQuizzes]
+
+    enum CodingKeys: String, CodingKey {
+        case quickCaptureId = "quick_capture_id"
+        case directQuizzes = "direct_quizzes"
+        case mainPoints = "main_points"
+    }
+}
+
+
+
+struct MainPointWithQuizzes: Codable {
+    let id: Int
+    let text: String
+    let context: String?
+    let state: QuizState?  // ✅ Reuse QuizState
+    let quizzes: [Quiz]
+}
+
+

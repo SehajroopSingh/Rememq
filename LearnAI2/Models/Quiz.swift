@@ -29,6 +29,10 @@ struct Quiz: Codable, Identifiable {
     
     // Fill-in-the-blank with options
     let options: [String]?  // ✅ Added explicitly for fillBlankWithOptions
+    let state: QuizState?  // ✅ Add this
+    
+    let recent_attempts: [QuizAttempt]?
+
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -40,6 +44,9 @@ struct Quiz: Codable, Identifiable {
         case statement
         case fillBlankQuestion = "question"
         case options  // ✅ Map directly
+        case state
+        case recent_attempts  // ✅ add this
+
 
         
         // ⚠️ DO NOT declare `correct_answer` twice
@@ -58,6 +65,9 @@ struct Quiz: Codable, Identifiable {
         fillBlankQuestion = try? container.decode(String.self, forKey: .fillBlankQuestion)
         options = try? container.decode([String].self, forKey: .options)  // ✅ New line
 
+        state = try? container.decode(QuizState.self, forKey: .state)  // ✅ FIXED
+        recent_attempts = try? container.decode([QuizAttempt].self, forKey: .recent_attempts)
+
 
         // Manually decode `correct_answer` for both true/false and fill-blank cases
         let raw = try? decoder.container(keyedBy: DynamicCodingKeys.self)
@@ -72,4 +82,28 @@ struct DynamicCodingKeys: CodingKey {
     init?(stringValue: String) { self.stringValue = stringValue }
     var intValue: Int? { nil }
     init?(intValue: Int) { return nil }
+}
+
+
+
+
+struct QuizState: Codable {
+    let interval_days: Double
+    let easiness_factor: Double
+    let repetition: Int
+    let total_attempts: Int
+    let correct_attempts: Int
+    let last_score: Double?
+    let next_due: String?  // Or use Date with custom decoder
+    let last_reviewed_at: String?
+    let mastery_level: Double
+}
+
+
+struct QuizAttempt: Codable, Identifiable {
+    var id: UUID { UUID() }  // if no ID from backend
+    let attempt_datetime: String
+    let was_correct: Bool
+    let score: Double
+    let response_data: [String: String]?
 }

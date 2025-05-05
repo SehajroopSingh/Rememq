@@ -1,34 +1,69 @@
 import SwiftUI
 
+//struct CustomTabBarExample: View {
+//    @State private var selectedTab = 0
+//
+//    var body: some View {
+//        NavigationStack {
+//            TabView(selection: $selectedTab) {
+//                DashboardView()
+//                    .tag(0)
+//
+//                NavigationStack {
+//                    SpacesView()
+//                }
+//                .tag(1)
+//                // The Chat tab
+//                ChatView()
+//                    .tag(2)
+//
+//                NotificationsView1()
+//                    .tag(3)
+//
+//                SocialView()
+//                    .tag(4)
+//            }
+//            .toolbar(.hidden, for: .tabBar)
+//
+//            // -- Insert a custom bar at the bottom
+//            .safeAreaInset(edge: .bottom) {
+//                CustomBarContent(selectedTab: $selectedTab)
+//            }
+//        }
+//    }
+//}
 struct CustomTabBarExample: View {
-    @State private var selectedTab = 0
+    @State private var selected = 0
 
     var body: some View {
-        NavigationStack {
-            TabView(selection: $selectedTab) {
-                DashboardView()
+        ZStack(alignment: .bottom) {          // ⬅︎ overlay zone
+            TabView(selection: $selected) {
+
+                // 1️⃣ Dashboard tab
+                NavigationStack { DashboardView() }
                     .tag(0)
 
-                SpacesView()
+                // 2️⃣ Spaces tab
+                NavigationStack { SpacesView() }
                     .tag(1)
 
-                // The Chat tab
-                ChatView()
+                // 3️⃣ Chat tab
+                NavigationStack { ChatView() }
                     .tag(2)
 
-                NotificationsView1()
+                // 4️⃣ Notifications
+                NavigationStack { GamificationView() }
                     .tag(3)
 
-                SocialView()
+                // 5️⃣ Social
+                NavigationStack { SocialView() }
                     .tag(4)
             }
-            .toolbar(.hidden, for: .tabBar)
+            .toolbar(.hidden, for: .tabBar)    // hide Apple’s bar
 
-            // -- Insert a custom bar at the bottom
-            .safeAreaInset(edge: .bottom) {
-                CustomBarContent(selectedTab: $selectedTab)
-            }
+            CustomBarContent(selectedTab: $selected)   // ⬅︎ always on top
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)     // optional
     }
 }
 
@@ -116,16 +151,6 @@ struct CustomBarContent: View {
 //    }
 //}
 
-struct NotificationsView1: View {
-    var body: some View {
-        VStack {
-            Text("NotificationsView")
-                .font(.largeTitle)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.green.edgesIgnoringSafeArea(.all))
-    }
-}
 
 //struct SocialView: View {
 //    var body: some View {

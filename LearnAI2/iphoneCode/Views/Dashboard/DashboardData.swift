@@ -13,9 +13,11 @@ struct DashboardData: Codable {
     var xp: Int
     var streak: Int
     var gems: Int
-    
-    // You can expand with more properties if the API returns them, e.g.:
-    // var level: Int
-    // var badges: [String]
-    // etc.
+    var level: Int?
+    var badges: [String]?
+    var quizzesAttempted: Int?
+    var quizzesCorrect: Int?
+    var dailyGoalProgress: Int?  // 0–100
+    var recentAchievements: [String]?
+    var dailyQuote: String?
 }
