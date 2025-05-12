@@ -8,20 +8,34 @@
 
 import SwiftUI
 
+import SwiftUI
+
 struct SocialView: View {
     var body: some View {
-        TabView {
-            FriendsListView()
-                .tabItem {
-                    Label("Friends", systemImage: "person.2")
-                }
-            
-            ActivityFeedView()
-                .tabItem {
-                    Label("Feed", systemImage: "list.bullet.rectangle")
-                }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                Text("Friends")
+                    .font(.title2)
+                    .padding(.horizontal)
+                FriendsListView()
+
+                Divider().padding(.horizontal)
+
+                Text("Activity Feed")
+                    .font(.title2)
+                    .padding(.horizontal)
+                ActivityFeedView()
+                
+                FriendSearchView()
+                    .padding()
+                IncomingRequestsView()
+
+            }
         }
     }
+}
+#Preview {
+    SocialView()
 }
 
 

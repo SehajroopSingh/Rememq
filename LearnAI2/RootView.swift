@@ -3,6 +3,7 @@ import SwiftUI
 
 struct RootView: View {
     @ObservedObject private var apiService = APIService.shared  // 🔹 Observe logout state
+    @AppStorage("grayscaleEnabled") private var grayscaleEnabled: Bool = false
 
     var isAuthenticated: Bool {
         !apiService.accessToken.isEmpty && !apiService.isLoggedOut
@@ -11,6 +12,8 @@ struct RootView: View {
     var body: some View {
         if isAuthenticated {
             CustomTabBarExample()
+                .grayscale(grayscaleEnabled ? 1.0 : 0.0)  // 🔁 Re-apply this here
+
                 .onAppear {
                     print("✅ Authenticated. Access Token: \(apiService.accessToken)")
                 }
@@ -22,6 +25,10 @@ struct RootView: View {
         }
     }
 }
-#Preview {
-    RootView()
+
+
+struct RootView_Previews: PreviewProvider {
+    static var previews: some View {
+        RootView()
+    }
 }

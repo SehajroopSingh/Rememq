@@ -6,6 +6,11 @@ struct AccountView: View {
     @State private var newUsername: String = ""
     @State private var newEmail: String = ""
     @State private var errorMessage: String?
+    @State private var timezone: String = "Loading..."
+    @State private var newTimezone: String = ""
+    let timezones = TimeZone.knownTimeZoneIdentifiers.sorted()
+
+
 
     var body: some View {
         VStack {
@@ -45,6 +50,23 @@ struct AccountView: View {
                                 .foregroundColor(.gray)
                         }
                     }
+                    HStack {
+                        Text("Timezone:")
+                        Spacer()
+                        if isEditing {
+                            Picker("Select your timezone", selection: $newTimezone) {
+                                ForEach(timezones, id: \.self) { tz in
+                                    Text(tz).tag(tz)
+                                }
+                            }
+                            .pickerStyle(.menu) // You can also try .wheel or .inline
+                        } else {
+                            Text(timezone)
+                                .foregroundColor(.gray)
+                        }
+                    }
+
+
                 }
 
                 if isEditing {
@@ -75,6 +97,26 @@ struct AccountView: View {
         .navigationTitle("Account")
     }
 
+//    private func fetchUserProfile() {
+//        APIService.shared.performRequest(endpoint: "accounts/user/profile/", method: "GET") { result in
+//            DispatchQueue.main.async {
+//                switch result {
+//                case .success(let data):
+//                    do {
+//                        let response = try JSONDecoder().decode(UserProfile.self, from: data)
+//                        self.username = response.username
+//                        self.email = response.email
+//                        self.timezone = response.timezone ?? "Not set"
+//
+//                    } catch {
+//                        self.errorMessage = "Failed to parse profile data."
+//                    }
+//                case .failure(let error):
+//                    self.errorMessage = "Error: \(error.localizedDescription)"
+//                }
+//            }
+//        }
+//    }
     private func fetchUserProfile() {
         APIService.shared.performRequest(endpoint: "accounts/user/profile/", method: "GET") { result in
             DispatchQueue.main.async {
@@ -84,6 +126,22 @@ struct AccountView: View {
                         let response = try JSONDecoder().decode(UserProfile.self, from: data)
                         self.username = response.username
                         self.email = response.email
+                        self.timezone = response.timezone ?? "UTC"
+
+                        // 👇 Auto-update timezone if needed
+                        if self.timezone == "UTC" || self.timezone.isEmpty {
+                            let detectedTZ = TimeZone.current.identifier
+                            APIService.shared.performRequest(
+                                endpoint: "accounts/profile/update/",
+                                method: "PATCH",
+                                body: ["timezone": detectedTZ]
+                            ) { _ in
+                                DispatchQueue.main.async {
+                                    self.timezone = detectedTZ
+                                }
+                            }
+                        }
+
                     } catch {
                         self.errorMessage = "Failed to parse profile data."
                     }
@@ -94,13 +152,16 @@ struct AccountView: View {
         }
     }
 
+
     private func updateProfile() {
         let requestBody: [String: Any] = [
             "username": newUsername,
-            "email": newEmail
+            "email": newEmail,
+            "timezone": newTimezone
+
         ]
 
-        APIService.shared.performRequest(endpoint: "user/profile/", method: "PATCH", body: requestBody) { result in
+        APIService.shared.performRequest(endpoint: "accounts/profile/update/", method: "PATCH", body: requestBody) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success:

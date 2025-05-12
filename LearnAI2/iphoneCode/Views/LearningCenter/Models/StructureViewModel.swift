@@ -29,4 +29,29 @@ class StructureViewModel: ObservableObject {
             }
         }
     }
+    
+    func findSet(by id: Int) -> SetItem? {
+        for space in spaces {
+            for group in space.groups {
+                if let match = group.sets.first(where: { $0.id == id }) {
+                    return match
+                }
+            }
+        }
+        return nil
+    }
+
+    func findGroup(by id: Int) -> Group? {
+        for space in spaces {
+            if let match = space.groups.first(where: { $0.id == id }) {
+                return match
+            }
+        }
+        return nil
+    }
+
+    func findSpace(by id: Int) -> Space? {
+        return spaces.first(where: { $0.id == id })
+    }
+
 }

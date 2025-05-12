@@ -11,4 +11,5 @@ import Foundation
 struct UserProfile: Codable {
     let username: String
     let email: String
+    let timezone: String? 
 }

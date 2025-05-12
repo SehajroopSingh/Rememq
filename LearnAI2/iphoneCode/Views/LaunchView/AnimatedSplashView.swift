@@ -1,3 +1,11 @@
+//
+//  AnimatedSplashView.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 5/10/25.
+//
+
+
 import SwiftUI
 
 struct AnimatedSplashView: View {
@@ -20,12 +28,12 @@ struct AnimatedSplashView: View {
 
                     // Delay before transitioning to RootView
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                        withAnimation {
+                        withAnimation(.easeOut(duration: 0.5)) {
                             isActive = false
                         }
                     }
                 }
-            Text("LearnAI")
+            Text("MEMRIZE")
                 .font(.largeTitle)
                 .bold()
                 .opacity(opacity)

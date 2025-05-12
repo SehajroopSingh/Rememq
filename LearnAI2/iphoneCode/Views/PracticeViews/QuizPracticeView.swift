@@ -55,6 +55,7 @@ import SwiftUI
 //}
 
 struct QuizPracticeView: View {
+    @EnvironmentObject var dashboardViewModel: DashboardViewModel
     @StateObject private var viewModel = PracticeViewModel()
 
     var body: some View {
@@ -108,7 +109,15 @@ struct QuizPracticeView: View {
             }
         }
         .onAppear {
-            viewModel.loadQuizzes(limit: 10)
+            viewModel.loadQuizzes(limit: 3)
+            // ✅ Access shared dashboard data here
+            if let snapshot = dashboardViewModel.dashboardData {
+                viewModel.initialDashboardSnapshot = snapshot
+                print("📋 Using shared dashboard snapshot: \(snapshot)")
+            } else {
+                print("❗️Dashboard data was nil on appear")
+            }
+
         }
         .navigationTitle("Daily Practice")
         .navigationBarTitleDisplayMode(.inline)

@@ -1,3 +1,11 @@
+//
+//  FriendSearchView.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 5/5/25.
+//
+
+
 import SwiftUI
 
 struct FriendSearchView: View {

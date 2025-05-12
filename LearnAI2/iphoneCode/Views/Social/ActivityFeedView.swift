@@ -7,28 +7,37 @@
 import SwiftUI
 
 import SwiftUI
-
 struct ActivityFeedView: View {
     @State private var activities: [Activity] = []
 
     var body: some View {
-        ScrollView {
-            ForEach(activities) { activity in
-                VStack(alignment: .leading) {
-                    Text(activity.content)
-                        .font(.body)
-                    Text(activity.timestamp, style: .relative)  // e.g., "5m ago"
-                        .font(.caption)
-                        .foregroundColor(.gray)
+        VStack {
+            if activities.isEmpty {
+                Text("Nothing yet! Here's some demo activity:")
+                    .foregroundColor(.gray)
+                ForEach(Activity.fakeFeed) { activity in
+                    activityCard(activity)
                 }
-                .padding()
-                .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
-                .padding(.horizontal)
+            } else {
+                ForEach(activities) { activity in
+                    activityCard(activity)
+                }
             }
         }
-        .onAppear {
-            fetchActivities()
+        .onAppear { fetchActivities() }
+        .padding(.horizontal)
+    }
+
+    func activityCard(_ activity: Activity) -> some View {
+        VStack(alignment: .leading) {
+            Text(activity.content)
+                .font(.body)
+            Text(activity.timestamp, style: .relative)
+                .font(.caption)
+                .foregroundColor(.gray)
         }
+        .padding()
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
     }
 
     func fetchActivities() {
@@ -36,8 +45,7 @@ struct ActivityFeedView: View {
             switch result {
             case .success(let data):
                 let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601  // make sure timestamp works
-
+                decoder.dateDecodingStrategy = .iso8601
                 do {
                     let decoded = try decoder.decode([Activity].self, from: data)
                     DispatchQueue.main.async {
@@ -53,4 +61,3 @@ struct ActivityFeedView: View {
         }
     }
 }
-

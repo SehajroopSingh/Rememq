@@ -20,10 +20,12 @@ struct FullCaptureView: View {
     @State private var additionalContext  = ""
     @State private var responseMessage    = ""
 
-    // Remote data
-    @State private var spaces: [Space]    = []
-    @State private var groups: [Group]    = []
-    @State private var sets:   [SetItem]  = []
+//    // Remote data
+//    @State private var spaces: [Space]    = []
+//    @State private var groups: [Group]    = []
+//    @State private var sets:   [SetItem]  = []
+    @StateObject private var viewModel = StructureViewModel()
+
 
     // Selections (Optional so Picker can bind)
     @State private var selectedSpace:  Space?
@@ -50,9 +52,17 @@ struct FullCaptureView: View {
                     Button("Cancel") { isExpanded = false }
                 }
             }
-            .onAppear(perform: fetchSpaces)
-            .onChange(of: selectedSpace)  { newSpace  in handleSpaceChange(newSpace)  }
-            .onChange(of: selectedGroup) { newGroup in handleGroupChange(newGroup) }
+            .onAppear {
+                viewModel.loadStructure()
+            }
+            .onChange(of: selectedSpace) { _ in
+                selectedGroup = nil
+                selectedSet = nil
+            }
+            .onChange(of: selectedGroup) { _ in
+                selectedSet = nil
+            }
+
         }
     }
 
@@ -60,48 +70,44 @@ struct FullCaptureView: View {
     private var pickersSection: some View {
         // --- inside pickersSection ---
         SwiftUI.Group {
-            if spaces.isEmpty {
+            if viewModel.spaces.isEmpty {
                 ProgressView("Loading spaces…")
             } else {
                 // Space Picker
                 Picker("Space", selection: $selectedSpace) {
-                    ForEach(spaces) { space in
+                    ForEach(viewModel.spaces) { space in
                         Text(space.name).tag(Optional(space))
                     }
                 }
                 .pickerStyle(.menu)
-                
-                // --- Group Picker (shows loader or "none") ---
-                if selectedSpace == nil {
-                    Text("Select a space first").foregroundColor(.secondary)
-                } else if groups.isEmpty {
-                    ProgressView("Loading groups…")
-                        .padding(.vertical, 4)
-                } else {
+
+                // Group Picker
+                if let groups = selectedSpace?.groups {
                     Picker("Group", selection: $selectedGroup) {
                         ForEach(groups) { group in
                             Text(group.name).tag(Optional(group))
                         }
                     }
                     .pickerStyle(.menu)
+                } else {
+                    Text("Select a space first").foregroundColor(.secondary)
                 }
 
-                
-                if selectedGroup == nil {
-                    Text("Select a group first")
-                        .foregroundColor(.secondary)
-                } else if sets.isEmpty {
-                    ProgressView("Loading sets…")
-                        .padding(.vertical, 4)
-                } else {
+                // Set Picker
+                if let sets = selectedGroup?.sets {
                     Picker("Set", selection: $selectedSet) {
                         ForEach(sets) { set in
                             Text(set.title).tag(Optional(set))
                         }
                     }
                     .pickerStyle(.menu)
+                } else if selectedGroup != nil {
+                    Text("Loading sets…").foregroundColor(.secondary)
+                } else {
+                    Text("Select a group first").foregroundColor(.secondary)
                 }
             }
+
         }
     }
 
@@ -133,38 +139,6 @@ struct FullCaptureView: View {
         .disabled(thought.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
     }
 
-    // MARK: ‑ Networking Helpers
-    private func fetchSpaces() {
-        APIService.shared.performRequest(endpoint: "organizer/spaces/") { result in
-            DispatchQueue.main.async {
-                if case let .success(data) = result {
-                    spaces = (try? JSONDecoder().decode([Space].self, from: data)) ?? []
-                }
-            }
-        }
-    }
-
-    private func fetchGroups(for spaceID: Int) {
-        APIService.shared.performRequest(endpoint: "organizer/groups/") { result in
-            DispatchQueue.main.async {
-                if case let .success(data) = result {
-                    let all = (try? JSONDecoder().decode([Group].self, from: data)) ?? []
-                    groups = all.filter { $0.space == spaceID }
-                }
-            }
-        }
-    }
-
-    private func fetchSets(for groupID: Int) {
-        APIService.shared.performRequest(endpoint: "organizer/sets/") { result in
-            DispatchQueue.main.async {
-                if case let .success(data) = result {
-                    let all = (try? JSONDecoder().decode([SetItem].self, from: data)) ?? []
-                    sets = all.filter { $0.group == groupID }
-                }
-            }
-        }
-    }
 
     private func submitCapture() {
         var payload: [String: Any] = [
@@ -192,16 +166,7 @@ struct FullCaptureView: View {
         }
     }
 
-    // MARK: ‑ Selection Handlers
-    private func handleSpaceChange(_ space: Space?) {
-        groups.removeAll(); sets.removeAll(); selectedGroup = nil; selectedSet = nil
-        if let id = space?.id { fetchGroups(for: id) }
-    }
 
-    private func handleGroupChange(_ group: Group?) {
-        sets.removeAll(); selectedSet = nil
-        if let id = group?.id { fetchSets(for: id) }
-    }
 
     private func closeAndFlash() {
         isExpanded = false
@@ -210,3 +175,5 @@ struct FullCaptureView: View {
         }
     }
 }
+
+

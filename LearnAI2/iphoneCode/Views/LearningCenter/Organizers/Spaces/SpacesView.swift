@@ -213,91 +213,185 @@ struct SpacesView: View {
     }
 }
 import SwiftUI
-
+//
 struct SpaceCardView: View {
     let space: Space
     @State private var userFacingDescription: String
     @State private var showCreateGroupSheet = false
-    @State private var isExpanded = false  // 👈 controls dropdown state
+    @State private var isExpanded = false
+    @State private var isPinned: Bool
 
     init(space: Space) {
         self.space = space
         self._userFacingDescription = State(initialValue: space.userFacingDescription ?? "")
+        self._isPinned = State(initialValue: space.isPinned)
     }
 
     var body: some View {
-        DisclosureGroup(
-            isExpanded: $isExpanded,
-            content: {
-                Divider().padding(.bottom, 4)
+        ZStack(alignment: .topTrailing) {
+            DisclosureGroup(
+                isExpanded: $isExpanded,
+                content: {
+                    Divider().padding(.bottom, 4)
 
-                // Groups section
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 12) {
-                        VStack(spacing: 8) {
-                            ForEach(space.groups) { group in
-                                NavigationLink(destination: SetsView(group: group)) {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 12) {
+                            VStack(spacing: 8) {
+                                ForEach(space.groups, id: \.id) { group in
+                                    GroupRowView(group: group)
+                                }
+
+                                Button(action: {
+                                    showCreateGroupSheet = true
+                                }) {
                                     HStack {
-                                        Text(group.name)
+                                        Text("New Group")
                                             .font(.body)
+                                            .foregroundColor(.white)
                                         Spacer()
+                                        Image(systemName: "plus")
+                                            .foregroundColor(.white)
                                     }
-                                    .padding(.vertical, 8)
-                                    .padding(.horizontal)
-                                    .background(Color(.systemBackground))
+                                    .padding()
+                                    .background(Color.blue)
                                     .cornerRadius(6)
                                 }
                             }
-
-                            Button(action: {
-                                showCreateGroupSheet = true
-                            }) {
-                                HStack {
-                                    Text("New Group")
-                                        .font(.body)
-                                        .foregroundColor(.white)
-                                    Spacer()
-                                    Image(systemName: "plus")
-                                        .foregroundColor(.white)
-                                }
-                                .padding()
-                                .background(Color.blue)
-                                .cornerRadius(6)
-                            }
-
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.secondary, lineWidth: 1)
+                            )
                         }
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.secondary, lineWidth: 1)
-                        )
+                        .padding(.bottom, 8)
                     }
-                    .padding(.bottom, 8)
-                }
-                .frame(maxHeight: 300)
-            },
-            label: {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(space.name)
-                        .font(.title3)
-                        .fontWeight(.bold)
+                    .frame(maxHeight: 300)
+                },
+                label: {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(space.name)
+                            .font(.title3)
+                            .fontWeight(.bold)
 
-                    if !userFacingDescription.isEmpty {
-                        Text(userFacingDescription)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                        if !userFacingDescription.isEmpty {
+                            Text(userFacingDescription)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
                     }
+                    .padding(.vertical, 8)
+                }
+            )
+            .padding()
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+            .shadow(radius: 4)
+            .padding(.horizontal)
+            .sheet(isPresented: $showCreateGroupSheet) {
+                CreateGroupView(space: space)
+            }
+
+            // ✅ Pin icon floating top-right
+            Button(action: {
+                togglePin()
+            }) {
+                Image(systemName: isPinned ? "star.fill" : "star")
+                    .foregroundColor(isPinned ? .yellow : .gray)
+                    .padding()
+            }
+        }
+    }
+
+    private func togglePin() {
+        let newPinnedState = !isPinned
+        isPinned = newPinnedState
+
+        APIService.shared.performRequest(
+            endpoint: "organizer/toggle-pin/",
+            method: "POST",
+            body: [
+                "type": "space",
+                "id": space.id
+            ]
+        ) { result in
+            switch result {
+            case .success(let data):
+                if let response = try? JSONDecoder().decode([String: String].self, from: data),
+                   let status = response["status"] {
+                    DispatchQueue.main.async {
+                        self.isPinned = (status == "pinned")
+                    }
+                }
+            case .failure(let error):
+                print("❌ Pin toggle error: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.isPinned = !newPinnedState
+                }
+            }
+        }
+    }
+}
+
+
+struct GroupRowView: View {
+    let group: Group
+    @State private var isPinned: Bool
+
+    init(group: Group) {
+        self.group = group
+        _isPinned = State(initialValue: group.isPinned)
+    }
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            NavigationLink(destination: SetsView(group: group)) {
+                HStack {
+                    Text(group.name)
+                        .font(.body)
+                    Spacer()
                 }
                 .padding(.vertical, 8)
+                .padding(.horizontal)
+                .background(Color(.systemBackground))
+                .cornerRadius(6)
             }
-        )
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
-        .shadow(radius: 4)
-        .padding(.horizontal)
-        .sheet(isPresented: $showCreateGroupSheet) {
-            CreateGroupView(space: space)
+
+            Button(action: {
+                togglePin()
+            }) {
+                Image(systemName: isPinned ? "star.fill" : "star")
+                    .foregroundColor(isPinned ? .yellow : .gray)
+                    .padding(6)
+            }
+        }
+    }
+
+    private func togglePin() {
+        let newState = !isPinned
+        isPinned = newState
+
+        APIService.shared.performRequest(
+            endpoint: "organizer/toggle-pin/",
+            method: "POST",
+            body: [
+                "type": "group",
+                "id": group.id
+            ]
+        ) { result in
+            switch result {
+            case .success(let data):
+                if let response = try? JSONDecoder().decode([String: String].self, from: data),
+                   let status = response["status"] {
+                    DispatchQueue.main.async {
+                        self.isPinned = (status == "pinned")
+                    }
+                }
+            case .failure(let error):
+                print("❌ Group pin toggle error: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.isPinned = !newState
+                }
+            }
         }
     }
 }

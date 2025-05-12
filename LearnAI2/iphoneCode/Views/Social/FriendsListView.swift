@@ -6,27 +6,41 @@
 //
 import SwiftUI
 
-
 struct FriendsListView: View {
     @State var friends: [User] = []
 
     var body: some View {
-        List(friends) { friend in
-            HStack {
-                avatarView(for: friend)
-                VStack(alignment: .leading) {
-                    Text(friend.username)
-                    Text("Streak: \(friend.streak) 🔥").font(.subheadline)
+        VStack {
+            if friends.isEmpty {
+                Text("No friends yet — here are some examples:")
+                    .foregroundColor(.gray)
+                ForEach(User.fakeFriends) { friend in
+                    friendRow(friend)
+                }
+            } else {
+                ForEach(friends) { friend in
+                    friendRow(friend)
                 }
             }
         }
-        .onAppear {
-            fetchFriends()
+        .padding(.horizontal)
+        .onAppear { fetchFriends() }
+    }
+
+    func friendRow(_ friend: User) -> some View {
+        HStack {
+            avatarView(for: friend)
+            VStack(alignment: .leading) {
+                Text(friend.username)
+                Text("Streak: \(friend.streak) 🔥").font(.subheadline)
+            }
+            Spacer()
         }
+        .padding(.vertical, 4)
     }
 
     func fetchFriends() {
-        APIService.shared.performRequest(endpoint: "friends/") { result in
+        APIService.shared.performRequest(endpoint: "social/friends/") { result in
             switch result {
             case .success(let data):
                 do {
@@ -43,10 +57,9 @@ struct FriendsListView: View {
         }
     }
 
-
     @ViewBuilder
     func avatarView(for friend: User) -> some View {
-        if let url = URL(string: friend.avatarURL), !friend.avatarURL.isEmpty {
+        if let avatar = friend.avatarURL, !avatar.isEmpty, let url = URL(string: avatar) {
             AsyncImage(url: url) { image in
                 image.resizable()
             } placeholder: {

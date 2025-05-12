@@ -310,17 +310,39 @@ struct QuickCapturesView: View {
 
     var body: some View {
         VStack {
+//            Button(action: {
+//                practiceViewModel.loadQuizzesFromSet(setId: set.id)
+//                isPracticing = true
+//            }) {
+//                Text("📝 Practice this Set")
+//                    .font(.headline)
+//                    .padding()
+//                    .frame(maxWidth: .infinity)
+//                    .background(Color.blue)
+//                    .foregroundColor(.white)
+//                    .cornerRadius(10)
+//            }
+//            .padding(.horizontal)
+            
             Button(action: {
                 practiceViewModel.loadQuizzesFromSet(setId: set.id)
                 isPracticing = true
             }) {
-                Text("📝 Practice this Set")
-                    .font(.headline)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+                HStack {
+                    Image(systemName: "sparkles")
+                    Text("Practice this Set")
+                }
+                .font(.system(.headline, design: .rounded))
+                .foregroundColor(.white)
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(
+                    LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        .cornerRadius(16)
+                        .shadow(color: .blue.opacity(0.4), radius: 8, x: 0, y: 4)
+                )
+                
+                
             }
             .padding(.horizontal)
 
@@ -383,7 +405,23 @@ struct QuickCapturesView: View {
             }
             .hidden()
         )
-        .navigationTitle("Quick Captures")
+        .navigationTitle(set.title)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                VStack(spacing: 2) {
+                    Text(set.title)
+                        .font(.headline)
+                    if let description = set.userFacingDescription {
+                        Text(description)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .lineLimit(2)
+                    }
+                }
+            }
+        }
+        .padding()
         .onAppear {
             viewModel.loadQuickCaptures(for: set.id)
         }

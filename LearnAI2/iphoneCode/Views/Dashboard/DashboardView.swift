@@ -1,9 +1,16 @@
 import SwiftUI
 
 struct DashboardView: View {
-    @StateObject private var viewModel = DashboardViewModel()
+    @EnvironmentObject var structureViewModel: StructureViewModel
+    @EnvironmentObject var dashboardViewModel: DashboardViewModel
     @State private var isProfileMenuOpen = false // Controls profile menu visibility
-    
+    @State private var selectedPinnedSet: SetItem?
+    @State private var selectedPinnedGroup: Group?
+    @State private var selectedPinnedSpace: Space?
+    @State private var navigateToSet = false
+    @State private var navigateToGroup = false
+    @State private var navigateToSpace = false
+
     var body: some View {
             ZStack {
                 // Main Dashboard (Shifts left when menu is open)
@@ -24,7 +31,7 @@ struct DashboardView: View {
                         Spacer()
                         
                         // Dashboard Data Bar
-                        if let data = viewModel.dashboardData {
+                        if let data = dashboardViewModel.dashboardData {
                             HStack(spacing: 20) {
                                 DashboardItemView(icon: "heart.fill", value: data.hearts, color: .red)
                                 DashboardItemView(icon: "star.fill", value: data.xp, color: .yellow)
@@ -73,12 +80,61 @@ struct DashboardView: View {
                     .padding(.horizontal)
 
                     // 🔹 New Card-Style Section Below Daily Practice Button 🔹
-                    CardSectionView()
+                    //CardSectionView()
+                    if let pinned = dashboardViewModel.dashboardData?.pinnedItems, !pinned.isEmpty {
+//                        PinnedItemsSection(pinned: pinned, onTap: routeToPinned)
+                        PinnedItemsTabbedView(pinned: pinned, onTap: routeToPinned)
 
-                    if let error = viewModel.errorMessage {
+                    }
+
+
+
+                    if let error = dashboardViewModel.errorMessage {
                         Text("Error: \(error)")
                             .foregroundColor(.red)
                     }
+                    
+                    NavigationLink(
+                        destination: selectedPinnedSet != nil
+                            ? AnyView(
+                                QuickCapturesView(set: selectedPinnedSet!)
+
+                            )
+                            : AnyView(EmptyView()),
+                        isActive: $navigateToSet
+                    ) {
+                        EmptyView()
+                    }
+
+
+
+
+                    NavigationLink(
+                        destination: selectedPinnedGroup != nil
+                            ? AnyView(
+                                SetsView(group: selectedPinnedGroup!)
+                            )
+                            : AnyView(EmptyView()),
+                        isActive: $navigateToGroup
+                    ) {
+                        EmptyView()
+                    }
+
+
+                    NavigationLink(
+                        destination: selectedPinnedSpace != nil
+                            ? AnyView(
+                                SpacesView()
+
+                            )
+                            : AnyView(EmptyView()),
+                        isActive: $navigateToSpace
+                    ) {
+                        EmptyView()
+                    }
+
+
+
                     Spacer()
                 }
                 .offset(x: isProfileMenuOpen ? -UIScreen.main.bounds.width * 0.75 : 0) // Moves the main view left
@@ -89,8 +145,38 @@ struct DashboardView: View {
                     ProfileMenuView(isOpen: $isProfileMenuOpen)
                 }
             }
+            .onAppear {
+                print("👀 DashboardView appeared")
+
+                dashboardViewModel.loadDashboard() // 🔁 Just re-fetc
+            }
         
     }
+    
+    func routeToPinned(_ item: PinnedItem) {
+        switch item.type {
+        case "set":
+            if let set = structureViewModel.findSet(by: item.id) {
+                selectedPinnedSet = set
+                navigateToSet = true
+            }
+        case "group":
+            if let group = structureViewModel.findGroup(by: item.id) {
+                selectedPinnedGroup = group
+                navigateToGroup = true
+            }
+        case "space":
+            if let space = structureViewModel.findSpace(by: item.id) {
+                selectedPinnedSpace = space
+                navigateToSpace = true
+            }
+        default:
+            break
+        }
+    }
+
+
+
 }
 
 // Subview for Dashboard Icons
@@ -159,6 +245,14 @@ struct ProfileMenuView: View {
                 isOpen = false
             }
         }
+    }
+}
+func symbolForPinnedType(_ type: String) -> String {
+    switch type {
+    case "space": return "folder.fill"
+    case "group": return "square.stack.fill"
+    case "set": return "doc.plaintext.fill"
+    default: return "pin.fill"
     }
 }
 

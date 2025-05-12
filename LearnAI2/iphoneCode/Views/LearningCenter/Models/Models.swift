@@ -21,6 +21,7 @@ struct SetItem: Codable, Identifiable, Equatable, Hashable {
     let llmDescription: String?
     let masteryTime: String
     let group: Int
+    let isPinned: Bool  // ✅ New
 
     enum CodingKeys: String, CodingKey {
         case id, title
@@ -28,6 +29,7 @@ struct SetItem: Codable, Identifiable, Equatable, Hashable {
         case llmDescription = "llm_description"
         case masteryTime = "mastery_time"
         case group
+        case isPinned = "is_pinned"  // ✅ Map JSON key
     }
 }
 
@@ -39,11 +41,13 @@ struct Group: Codable, Identifiable, Equatable, Hashable {
     let image: String?
     let space: Int
     let sets: [SetItem]
+    let isPinned: Bool  // ✅ New
 
     enum CodingKeys: String, CodingKey {
         case id, name, image, sets, space
         case userFacingDescription = "user_facing_description"
         case llmDescription = "llm_description"
+        case isPinned = "is_pinned"  // ✅ Map JSON key
     }
 }
 
@@ -53,11 +57,13 @@ struct Space: Codable, Identifiable, Equatable, Hashable {
     let userFacingDescription: String?
     let llmDescription: String?
     let groups: [Group]
+    let isPinned: Bool  // ✅ New
 
     enum CodingKeys: String, CodingKey {
         case id, name, groups
         case userFacingDescription = "user_facing_description"
         case llmDescription = "llm_description"
+        case isPinned = "is_pinned"  // ✅ Map JSON key
     }
 }
 

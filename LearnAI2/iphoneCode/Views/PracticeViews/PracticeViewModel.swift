@@ -9,6 +9,7 @@ class PracticeViewModel: ObservableObject {
     @Published var sessionID: String?
     @Published var startingHearts: Int = 5  // Default to 3, will be updated by backend
     @Published var remainingHearts: Int = 3
+    var initialDashboardSnapshot: DashboardData?
 
     
     // ✅ Store user answers here
@@ -144,10 +145,42 @@ class PracticeViewModel: ObservableObject {
     }
     
     
-    
-    func submitQuizSession() {
+//    
+//    func submitQuizSession() {
+//        guard let sessionID = sessionID else {
+//            print("⚠️ No session ID")
+//            return
+//        }
+//        
+//        let payload: [String: Any] = [
+//            "session_id": sessionID,
+//            "results": submittedResults.values.map {
+//                [
+//                    "quiz_id": $0.quiz_id,
+//                    "was_correct": $0.was_correct,
+//                    "score": $0.score,
+//                    "response_data": $0.response_data
+//                ]
+//            }
+//        ]
+//
+//        APIService.shared.performRequest(
+//            endpoint: "scheduler/submit-session/",
+//            method: "POST",
+//            body: payload
+//        ) { result in
+//            switch result {
+//            case .success:
+//                print("✅ Session submitted successfully.")
+//            case .failure(let error):
+//                print("❌ Submission failed: \(error.localizedDescription)")
+//            }
+//        }
+//    }
+    func submitQuizSession(completion: @escaping (Result<SessionResultResponse, Error>) -> Void) {
         guard let sessionID = sessionID else {
             print("⚠️ No session ID")
+            completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No session ID"])))
             return
         }
 
@@ -162,27 +195,34 @@ class PracticeViewModel: ObservableObject {
                 ]
             }
         ]
-
-        APIService.shared.performRequest(
-            endpoint: "scheduler/submit-session/",
-            method: "POST",
-            body: payload
-        ) { result in
-            switch result {
-            case .success:
-                print("✅ Session submitted successfully.")
-            case .failure(let error):
-                print("❌ Submission failed: \(error.localizedDescription)")
+                
+                APIService.shared.performRequest(
+                    endpoint: "scheduler/submit-session/",
+                    method: "POST",
+                    body: payload
+                ) { result in
+                    switch result {
+                    case .success(let data):
+                        do {
+                            let decoded = try JSONDecoder().decode(SessionResultResponse.self, from: data)
+                            print("✅ Submission success with result: \(decoded)")
+                            completion(.success(decoded))
+                        } catch {
+                            print("❌ Decoding error: \(error)")
+                            completion(.failure(error))
+                        }
+                    case .failure(let error):
+                        print("❌ Submission failed: \(error.localizedDescription)")
+                        completion(.failure(error))
+                    }
+                }
             }
-        }
-    }
-    
+            
+
 }
 
     
-    
-    
-    
+
 
 // Matches the API JSON response format: { "quizzes": [ ... ] }
 private struct QuizResponse: Codable {
@@ -194,12 +234,24 @@ private struct QuizResponse: Codable {
 }
 
 
-
-
-
 struct QuizResult: Codable {
     let quiz_id: Int
     let was_correct: Bool
     let score: Double
     let response_data: [String: String]  // keep it simple and flexible
+}
+
+
+struct SessionResultResponse: Codable {
+    let message: String
+    let xpDelta: Int
+    let pointsDelta: Int
+    let coinsDelta: Int
+
+    enum CodingKeys: String, CodingKey {
+        case message
+        case xpDelta = "xp_delta"
+        case pointsDelta = "points_delta"
+        case coinsDelta = "coins_delta"
+    }
 }
