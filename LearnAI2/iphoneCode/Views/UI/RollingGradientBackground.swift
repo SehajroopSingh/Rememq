@@ -1,3 +1,11 @@
+//
+//  RollingGradientBackground.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 5/13/25.
+//
+
+
 import SwiftUI
 
 struct RollingGradientBackground: View {

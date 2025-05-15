@@ -72,9 +72,15 @@ struct QuickCaptureView: View {
         ZStack {
             VStack {
                 ZStack(alignment: .bottomTrailing) {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(.systemGray6))
-                        .frame(height: UIScreen.main.bounds.height * 0.08)
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.white.opacity(0.1))
+                        .background(.ultraThinMaterial)
+                        .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 2)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        )
+
                         .overlay(
                             Text("Jot down your thoughts…")
                                 .foregroundColor(.gray)
@@ -85,27 +91,60 @@ struct QuickCaptureView: View {
 
                     // ➋ Two‐button HStack
                     HStack(spacing: 16) {
-                        // “+” button
-                        Button { isExpanded = true } label: {
-                            Image(systemName: "plus.circle.fill")
-                                .resizable()
-                                .frame(width: 44, height: 44)
-                                .foregroundColor(.blue)
-                                .background(Color.white.opacity(0.8))
-                                .clipShape(Circle())
-                                .shadow(radius: 2)
-                        }
 
-                        // Mic button
-                        Button { showAudioCapture = true } label: {
-                            Image(systemName: "mic.circle.fill")
-                                .resizable()
-                                .frame(width: 44, height: 44)
-                                .foregroundColor(.red)
-                                .background(Color.white.opacity(0.8))
+                        Button { isExpanded = true } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 52, height: 52)
+                                .background(
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color.white.opacity(0.1))
+                                            .background(.ultraThinMaterial)
+                                            .blur(radius: 0.3)
+                                            .shadow(color: .white.opacity(0.25), radius: 2, x: -2, y: -2)
+                                            .shadow(color: .black.opacity(0.3), radius: 4, x: 2, y: 4)
+
+                                        Circle()
+                                            .strokeBorder(LinearGradient(
+                                                colors: [Color.white.opacity(0.7), Color.white.opacity(0.1)],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ), lineWidth: 1.2)
+                                    }
+                                )
                                 .clipShape(Circle())
-                                .shadow(radius: 2)
                         }
+                        .buttonStyle(PlainButtonStyle())
+
+                        // 🎤 Mic button (same style)
+                        Button { showAudioCapture = true } label: {
+                            Image(systemName: "mic")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 52, height: 52)
+                                .background(
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color.white.opacity(0.1))
+                                            .background(.ultraThinMaterial)
+                                            .blur(radius: 0.3)
+                                            .shadow(color: .white.opacity(0.25), radius: 2, x: -2, y: -2)
+                                            .shadow(color: .black.opacity(0.3), radius: 4, x: 2, y: 4)
+
+                                        Circle()
+                                            .strokeBorder(LinearGradient(
+                                                colors: [Color.white.opacity(0.7), Color.white.opacity(0.1)],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ), lineWidth: 1.2)
+                                    }
+                                )
+                                .clipShape(Circle())
+                        }
+                        .buttonStyle(PlainButtonStyle())
+
                     }
                     .offset(x: -10, y: -10)
                 }

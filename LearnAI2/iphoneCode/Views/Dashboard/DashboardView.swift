@@ -12,145 +12,181 @@ struct DashboardView: View {
     @State private var navigateToSpace = false
 
     var body: some View {
-            ZStack {
-                // Main Dashboard (Shifts left when menu is open)
-                VStack {
-                    HStack {
-                        // Menu Button (Left)
-                        Menu {
-                            Button("Settings", action: { print("Settings tapped") })
-                            Button("Profile", action: { print("Profile tapped") })
-                            Button("Logout", action: { print("Logout tapped") })
-                        } label: {
-                            Image(systemName: "line.horizontal.3")
-                                .resizable()
-                                .frame(width: 24, height: 18)
-                                .padding()
-                        }
-                        
-                        Spacer()
-                        
-                        // Dashboard Data Bar
-                        if let data = dashboardViewModel.dashboardData {
-                            HStack(spacing: 20) {
-                                DashboardItemView(icon: "heart.fill", value: data.hearts, color: .red)
-                                DashboardItemView(icon: "star.fill", value: data.xp, color: .yellow)
-                                DashboardItemView(icon: "flame.fill", value: data.streak, color: .orange)
-                                DashboardItemView(icon: "diamond.fill", value: data.gems, color: .blue)
-                            }
-                        } else {
-                            Text("Loading...")
-                                .font(.headline)
-                        }
-                        
-                        Spacer()
-                        
-                        // Profile Button (Right)
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                isProfileMenuOpen.toggle()
-                            }
-                        }) {
-                            Image(systemName: "person.circle.fill")
-                                .resizable()
-                                .frame(width: 32, height: 32)
-                                .padding()
-                        }
-                    }
-                    .background(Color.gray.opacity(0.2))
-                    
-                    QuickCaptureView()
-                    
-                    // Daily Practice Section
-                    Text("Daily Practice")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading)
-                    
-                    // Full-width Button
-                    NavigationLink(destination: DailyPracticeView()) {
-                        Text("Start Practice")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-                    .padding(.horizontal)
 
-                    // 🔹 New Card-Style Section Below Daily Practice Button 🔹
-                    //CardSectionView()
-                    if let pinned = dashboardViewModel.dashboardData?.pinnedItems, !pinned.isEmpty {
-//                        PinnedItemsSection(pinned: pinned, onTap: routeToPinned)
-                        PinnedItemsTabbedView(pinned: pinned, onTap: routeToPinned)
-
-                    }
-
-
-
-                    if let error = dashboardViewModel.errorMessage {
-                        Text("Error: \(error)")
-                            .foregroundColor(.red)
-                    }
-                    
-                    NavigationLink(
-                        destination: selectedPinnedSet != nil
-                            ? AnyView(
-                                QuickCapturesView(set: selectedPinnedSet!)
-
-                            )
-                            : AnyView(EmptyView()),
-                        isActive: $navigateToSet
-                    ) {
-                        EmptyView()
-                    }
-
-
-
-
-                    NavigationLink(
-                        destination: selectedPinnedGroup != nil
-                            ? AnyView(
-                                SetsView(group: selectedPinnedGroup!)
-                            )
-                            : AnyView(EmptyView()),
-                        isActive: $navigateToGroup
-                    ) {
-                        EmptyView()
-                    }
-
-
-                    NavigationLink(
-                        destination: selectedPinnedSpace != nil
-                            ? AnyView(
-                                SpacesView()
-
-                            )
-                            : AnyView(EmptyView()),
-                        isActive: $navigateToSpace
-                    ) {
-                        EmptyView()
-                    }
-
-
-
-                    Spacer()
-                }
-                .offset(x: isProfileMenuOpen ? -UIScreen.main.bounds.width * 0.75 : 0) // Moves the main view left
-                .animation(.easeInOut(duration: 0.3), value: isProfileMenuOpen)
                 
-                // Profile Menu View (Sliding in from the right)
-                if isProfileMenuOpen {
-                    ProfileMenuView(isOpen: $isProfileMenuOpen)
-                }
-            }
-            .onAppear {
-                print("👀 DashboardView appeared")
+                    ZStack {
 
-                dashboardViewModel.loadDashboard() // 🔁 Just re-fetc
-            }
-        
+
+                        BlobbyBackground()
+                            
+                            // or BlobbyBackground()
+                            
+                            // Main Dashboard (Shifts left when menu is open)
+                            VStack {
+                                
+
+                                HStack {
+                                    
+
+                                    
+                                    
+                                    // Dashboard Data Bar
+                                    if let data = dashboardViewModel.dashboardData {
+                                        HStack(spacing: 20) {
+                                            DashboardItemView(
+                                                icon: "heart_red_blurred_glasss",
+                                                value: data.hearts,
+                                                color: .red
+                                            )
+                                            DashboardItemView(icon: "xp_yellow_glassmorphism", value: data.xp, color: .yellow)
+                                            DashboardItemView(icon: "red_yellow_glassy _blurred_ fire", value: data.streak, color: .orange)
+                                            DashboardItemView(icon: "gem_blue_blurred_glass", value: data.gems, color: .blue)
+                                        }
+                                    } else {
+                                        Text("Loading...")
+                                            .font(.headline)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    // Profile Button (Right)
+                                    Button(action: {
+                                        withAnimation(.easeInOut(duration: 0.3)) {
+                                            isProfileMenuOpen.toggle()
+                                        }
+                                    }) {
+                                        Image(systemName: "person.circle.fill")
+                                            .resizable()
+                                            .frame(width: 32, height: 32)
+                                            .padding(8)
+                                            .background(.ultraThinMaterial)
+                                            .clipShape(Circle())
+                                            .overlay(
+                                                Circle()
+                                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                            )
+                                            .shadow(radius: 4)
+                                    }
+                                }
+                                .padding(.top, 0.2) // reduce this value or change it to `.padding(.top, 0)` if needed
+                                .padding(.top, 10)
+                                .padding(.horizontal)
+                                .frame(height: 70)
+                                .background(.ultraThinMaterial) //
+                                
+                                QuickCaptureView()
+                                
+                                
+                                // Full-width Button
+                                // 3D Glassmorphism Button
+                                NavigationLink(destination: DailyPracticeView()) {
+                                    Text("Start Practice")
+                                        .fontWeight(.semibold)
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(
+                                            ZStack {
+                                                // Frosted glass layer
+                                                RoundedRectangle(cornerRadius: 16)
+                                                    .fill(Color.white.opacity(0.15))
+                                                    .background(.ultraThinMaterial)
+                                                    .blur(radius: 0.5)
+                                                    .shadow(color: .white.opacity(0.2), radius: 2, x: -2, y: -2)
+                                                    .shadow(color: .black.opacity(0.25), radius: 4, x: 2, y: 4)
+
+                                                // Inner shine
+                                                RoundedRectangle(cornerRadius: 16)
+                                                    .strokeBorder(LinearGradient(
+                                                        colors: [Color.white.opacity(0.6), Color.white.opacity(0.05)],
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    ), lineWidth: 1.5)
+                                            }
+                                        )
+                                        .foregroundColor(.white)
+                                        .cornerRadius(16)
+                                        .padding(.horizontal)
+                                }
+
+                                
+                                // 🔹 New Card-Style Section Below Daily Practice Button 🔹
+                                //CardSectionView()
+                                if let pinned = dashboardViewModel.dashboardData?.pinnedItems, !pinned.isEmpty {
+                                    //                        PinnedItemsSection(pinned: pinned, onTap: routeToPinned)
+                                    PinnedItemsTabbedView(pinned: pinned, onTap: routeToPinned)
+                                    
+                                }
+                                
+                                if let captures = dashboardViewModel.dashboardData?.recentQuickCaptures, !captures.isEmpty {
+                                    RecentQuickCapturesCarousel(captures: captures)
+                                }
+                                
+                                
+                                if let error = dashboardViewModel.errorMessage {
+                                    Text("Error: \(error)")
+                                        .foregroundColor(.red)
+                                }
+                                
+                                NavigationLink(
+                                    destination: selectedPinnedSet != nil
+                                    ? AnyView(
+                                        QuickCapturesView(set: selectedPinnedSet!)
+                                        
+                                    )
+                                    : AnyView(EmptyView()),
+                                    isActive: $navigateToSet
+                                ) {
+                                    EmptyView()
+                                }
+                                
+                                
+                                
+                                
+                                NavigationLink(
+                                    destination: selectedPinnedGroup != nil
+                                    ? AnyView(
+                                        SetsView(group: selectedPinnedGroup!)
+                                    )
+                                    : AnyView(EmptyView()),
+                                    isActive: $navigateToGroup
+                                ) {
+                                    EmptyView()
+                                }
+                                
+                                
+                                NavigationLink(
+                                    destination: selectedPinnedSpace != nil
+                                    ? AnyView(
+                                        SpacesView()
+                                        
+                                    )
+                                    : AnyView(EmptyView()),
+                                    isActive: $navigateToSpace
+                                ) {
+                                    EmptyView()
+                                }
+                                
+                                
+                                
+                                Spacer()
+                            }
+                            .offset(x: isProfileMenuOpen ? -UIScreen.main.bounds.width * 0.75 : 0) // Moves the main view left
+                            .animation(.easeInOut(duration: 0.3), value: isProfileMenuOpen)
+                            
+                            
+                            // Profile Menu View (Sliding in from the right)
+                            if isProfileMenuOpen {
+                                ProfileMenuView(isOpen: $isProfileMenuOpen)
+                            }
+                        }
+                    
+                    .onAppear {
+                        print("👀 DashboardView appeared")
+                        
+                        dashboardViewModel.loadDashboard() // 🔁 Just re-fetc
+                    
+                }
+            
     }
     
     func routeToPinned(_ item: PinnedItem) {
@@ -179,67 +215,137 @@ struct DashboardView: View {
 
 }
 
-// Subview for Dashboard Icons
 struct DashboardItemView: View {
     let icon: String
     let value: Int
     let color: Color
-    
+
     var body: some View {
         HStack {
-            Image(systemName: icon)
-                .foregroundColor(color)
+            Image(icon) // Not systemName
+                .resizable()
+                .frame(width: 30, height: 30)
+                .foregroundColor(color) // optional, if image is monochrome
             Text("\(value)")
                 .font(.headline)
+                .foregroundColor(color)
         }
     }
 }
+//
+//// MARK: - Profile Menu View with Account Navigation
+//struct ProfileMenuView: View {
+//    @Binding var isOpen: Bool
+//    
+//    var body: some View {
+//        HStack {
+//            Spacer()
+//            
+//            VStack(alignment: .leading) {
+//                Text("Profile Menu")
+//                    .font(.title)
+//                    .fontWeight(.bold)
+//                    .padding(.top, UIApplication.shared.windows.first?.safeAreaInsets.top ?? 20)
+//                    .padding(.leading)
+//                
+//                Divider()
+//                
+//                NavigationLink(destination: AccountView()) {  // ✅ Navigate to AccountView
+//                    Text("Account")
+//                        .padding()
+//                }
+//                
+//                NavigationLink(destination: SettingsView()) {
+//                    Text("Settings").padding()
+//                }
+//                
+//                Button(action: { print("Help tapped") }) {
+//                    Text("Help").padding()
+//                }
+//                
+//                Button(action: { print("Log Out tapped") }) {
+//                    Text("Log Out")
+//                        .foregroundColor(.red)
+//                        .padding()
+//                }
+//                
+//                Spacer()
+//            }
+//            .frame(width: UIScreen.main.bounds.width * 0.75)
+//            .background(Color.white)
+//            .edgesIgnoringSafeArea(.bottom)
+//            .offset(x: isOpen ? 0 : UIScreen.main.bounds.width * 0.75)
+//            .animation(.easeInOut(duration: 0.3), value: isOpen)
+//        }
+//        .background(Color.black.opacity(isOpen ? 0.3 : 0).edgesIgnoringSafeArea(.all))
+//        .onTapGesture {
+//            withAnimation(.easeInOut(duration: 0.3)) {
+//                isOpen = false
+//            }
+//        }
+//    }
+//}
 
-// MARK: - Profile Menu View with Account Navigation
+import SwiftUI
+
 struct ProfileMenuView: View {
     @Binding var isOpen: Bool
+    
+    // Utility to get safe area inset for bottom
+    private var bottomSafeArea: CGFloat {
+        UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0
+    }
     
     var body: some View {
         HStack {
             Spacer()
-            
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 0) {
                 Text("Profile Menu")
                     .font(.title)
                     .fontWeight(.bold)
                     .padding(.top, UIApplication.shared.windows.first?.safeAreaInsets.top ?? 20)
-                    .padding(.leading)
-                
+                    .padding(.horizontal)
                 Divider()
+                    .background(Color.white.opacity(0.5))
+                    .padding(.horizontal)
                 
-                NavigationLink(destination: AccountView()) {  // ✅ Navigate to AccountView
+                NavigationLink(destination: AccountView()) {
                     Text("Account")
                         .padding()
                 }
-                
                 NavigationLink(destination: SettingsView()) {
-                    Text("Settings").padding()
+                    Text("Settings")
+                        .padding()
                 }
-                
                 Button(action: { print("Help tapped") }) {
-                    Text("Help").padding()
+                    Text("Help")
+                        .padding()
                 }
-                
                 Button(action: { print("Log Out tapped") }) {
                     Text("Log Out")
                         .foregroundColor(.red)
                         .padding()
                 }
-                
-                Spacer()
+                Spacer(minLength: bottomSafeArea)
             }
             .frame(width: UIScreen.main.bounds.width * 0.75)
-            .background(Color.white)
-            .edgesIgnoringSafeArea(.bottom)
+            // Glassmorphic background
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.2), radius: 10, x: -5, y: 0)
             .offset(x: isOpen ? 0 : UIScreen.main.bounds.width * 0.75)
             .animation(.easeInOut(duration: 0.3), value: isOpen)
         }
-        .background(Color.black.opacity(isOpen ? 0.3 : 0).edgesIgnoringSafeArea(.all))
+        // Background dimmer
+        .background(
+            Color.black
+                .opacity(isOpen ? 0.3 : 0)
+                .edgesIgnoringSafeArea(.all)
+        )
         .onTapGesture {
             withAnimation(.easeInOut(duration: 0.3)) {
                 isOpen = false

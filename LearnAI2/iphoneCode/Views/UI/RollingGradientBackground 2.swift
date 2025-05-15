@@ -1,14 +1,22 @@
+//
+//  RollingGradientBackground 2.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 5/13/25.
+//
+
+
 import SwiftUI
 
-struct RollingGradientBackground: View {
+struct RollingGradientBackground2: View {
     @State private var moveGradient = false
 
     var body: some View {
         GeometryReader { geometry in
             LinearGradient(
                 gradient: Gradient(colors: [
-                    Color.green.opacity(0.5),
-                    Color(red: 0.8, green: 1.0, blue: 0.8) // light green
+                    Color(red: 0.2, green: 0.5, blue: 0.2),         // Dark forest green
+                    Color(red: 0.5, green: 1.0, blue: 0.5)          // Light pastel green
                 ]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
