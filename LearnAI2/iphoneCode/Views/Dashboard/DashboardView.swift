@@ -287,72 +287,185 @@ struct DashboardItemView: View {
 //}
 
 import SwiftUI
+//
+//struct ProfileMenuView: View {
+//    @Binding var isOpen: Bool
+//    
+//    // Utility to get safe area inset for bottom
+//    private var bottomSafeArea: CGFloat {
+//        UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0
+//    }
+//    
+//    var body: some View {
+//        HStack {
+//            Spacer()
+//            VStack(alignment: .leading, spacing: 0) {
+//                Text("Profile Menu")
+//                    .font(.title)
+//                    .fontWeight(.bold)
+//                    .padding(.top, UIApplication.shared.windows.first?.safeAreaInsets.top ?? 20)
+//                    .padding(.horizontal)
+//                Divider()
+//                    .background(Color.white.opacity(0.5))
+//                    .padding(.horizontal)
+//                
+//                NavigationLink(destination: AccountView()) {
+//                    Text("Account")
+//                        .padding()
+//                }
+//                NavigationLink(destination: SettingsView()) {
+//                    Text("Settings")
+//                        .padding()
+//                }
+//                Button(action: { print("Help tapped") }) {
+//                    Text("Help")
+//                        .padding()
+//                }
+//                Button(action: { print("Log Out tapped") }) {
+//                    Text("Log Out")
+//                        .foregroundColor(.red)
+//                        .padding()
+//                }
+//                Spacer(minLength: bottomSafeArea)
+//            }
+//            .frame(width: UIScreen.main.bounds.width * 0.75)
+//            // Glassmorphic background
+//            .background(.ultraThinMaterial)
+//            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+//            .overlay(
+//                RoundedRectangle(cornerRadius: 20, style: .continuous)
+//                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+//            )
+//            .shadow(color: Color.black.opacity(0.2), radius: 10, x: -5, y: 0)
+//            .offset(x: isOpen ? 0 : UIScreen.main.bounds.width * 0.75)
+//            .animation(.easeInOut(duration: 0.3), value: isOpen)
+//        }
+//        // Background dimmer
+//        .background(
+//            Color.black
+//                .opacity(isOpen ? 0.3 : 0)
+//                .edgesIgnoringSafeArea(.all)
+//        )
+//        .onTapGesture {
+//            withAnimation(.easeInOut(duration: 0.3)) {
+//                isOpen = false
+//            }
+//        }
+//    }
+//}
+
+import SwiftUI
 
 struct ProfileMenuView: View {
     @Binding var isOpen: Bool
-    
+    @State private var showLogoutConfirmation = false
+
     // Utility to get safe area inset for bottom
     private var bottomSafeArea: CGFloat {
         UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0
     }
-    
+
     var body: some View {
-        HStack {
-            Spacer()
-            VStack(alignment: .leading, spacing: 0) {
-                Text("Profile Menu")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .padding(.top, UIApplication.shared.windows.first?.safeAreaInsets.top ?? 20)
-                    .padding(.horizontal)
-                Divider()
-                    .background(Color.white.opacity(0.5))
-                    .padding(.horizontal)
-                
-                NavigationLink(destination: AccountView()) {
-                    Text("Account")
+        ZStack {
+            // MARK: – Underlying menu
+            HStack {
+                Spacer()
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Profile Menu")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .padding(.top, UIApplication.shared.windows.first?.safeAreaInsets.top ?? 20)
+                        .padding(.horizontal)
+                    Divider()
+                        .background(Color.white.opacity(0.5))
+                        .padding(.horizontal)
+
+                    NavigationLink("Account", destination: AccountView())
                         .padding()
-                }
-                NavigationLink(destination: SettingsView()) {
-                    Text("Settings")
+                    NavigationLink("Settings", destination: SettingsView())
                         .padding()
-                }
-                Button(action: { print("Help tapped") }) {
-                    Text("Help")
+                    Button("Help") { /* … */ }
                         .padding()
+
+                    // ← Our Logout button now triggers the popup
+                    Button(action: {
+                        withAnimation(.spring()) {
+                            showLogoutConfirmation = true
+                        }
+                    }) {
+                        Text("Log Out")
+                            .foregroundColor(.red)
+                            .padding()
+                    }
+
+                    Spacer(minLength: bottomSafeArea)
                 }
-                Button(action: { print("Log Out tapped") }) {
-                    Text("Log Out")
-                        .foregroundColor(.red)
-                        .padding()
-                }
-                Spacer(minLength: bottomSafeArea)
+                .frame(width: UIScreen.main.bounds.width * 0.75)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                )
+                .shadow(color: Color.black.opacity(0.2), radius: 10, x: -5, y: 0)
+                .offset(x: isOpen ? 0 : UIScreen.main.bounds.width * 0.75)
+                .animation(.easeInOut(duration: 0.3), value: isOpen)
             }
-            .frame(width: UIScreen.main.bounds.width * 0.75)
-            // Glassmorphic background
-            .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
-            )
-            .shadow(color: Color.black.opacity(0.2), radius: 10, x: -5, y: 0)
-            .offset(x: isOpen ? 0 : UIScreen.main.bounds.width * 0.75)
-            .animation(.easeInOut(duration: 0.3), value: isOpen)
-        }
-        // Background dimmer
-        .background(
-            Color.black
-                .opacity(isOpen ? 0.3 : 0)
-                .edgesIgnoringSafeArea(.all)
-        )
-        .onTapGesture {
-            withAnimation(.easeInOut(duration: 0.3)) {
-                isOpen = false
+            .background(Color.black.opacity(isOpen ? 0.3 : 0).edgesIgnoringSafeArea(.all))
+            .onTapGesture {
+                withAnimation(.easeInOut) { isOpen = false }
+            }
+
+            // MARK: – Logout Confirmation Popup
+            if showLogoutConfirmation {
+                // Dimmed backdrop
+                Color.black.opacity(0.4)
+                    .edgesIgnoringSafeArea(.all)
+                    .transition(.opacity)
+
+                // Glass-morphic card
+                VStack(spacing: 20) {
+                    Text("Log Out?")
+                        .font(.headline)
+                    Text("Are you sure you want to log out?")
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+
+                    HStack(spacing: 16) {
+                        Button("Cancel") {
+                            withAnimation(.spring()) {
+                                showLogoutConfirmation = false
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(.ultraThinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+                        Button("Log Out") {
+                            APIService.shared.logout()
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(.ultraThinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                }
+                .padding(30)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                )
+                .shadow(color: Color.black.opacity(0.25), radius: 20, x: 0, y: 10)
+                .padding(.horizontal, 40)
+                .transition(.scale.combined(with: .opacity))
             }
         }
     }
 }
+
 func symbolForPinnedType(_ type: String) -> String {
     switch type {
     case "space": return "folder.fill"

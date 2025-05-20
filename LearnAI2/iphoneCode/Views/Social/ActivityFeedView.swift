@@ -1,63 +1,81 @@
-//
-//  ActivityFeedView.swift
-//  ReMEMq
-//
-//  Created by Sehaj Singh on 5/5/25.
-//
 import SwiftUI
 
-import SwiftUI
 struct ActivityFeedView: View {
-    @State private var activities: [Activity] = []
+    @EnvironmentObject var socialVM: SocialViewModel
+
 
     var body: some View {
-        VStack {
-            if activities.isEmpty {
-                Text("Nothing yet! Here's some demo activity:")
-                    .foregroundColor(.gray)
-                ForEach(Activity.fakeFeed) { activity in
-                    activityCard(activity)
+        ZStack {
+
+            ScrollView {
+                VStack(spacing: 16) {
+                    if socialVM.activityFeed.isEmpty {
+                        Text("Nothing yet! Here's some demo activity:")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+                            .padding()
+                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    }
+
+                    ForEach(socialVM.activityFeed.isEmpty ? Activity.fakeFeed : socialVM.activityFeed) { activity in
+                        activityCard(activity)                    }
                 }
-            } else {
-                ForEach(activities) { activity in
-                    activityCard(activity)
-                }
+                .padding(.horizontal)
+                .padding(.top)
             }
         }
-        .onAppear { fetchActivities() }
-        .padding(.horizontal)
+        .onAppear {
+            Task {
+                await socialVM.fetchActivityFeed()
+            }
+        }
     }
 
-    func activityCard(_ activity: Activity) -> some View {
-        VStack(alignment: .leading) {
+    @ViewBuilder
+    private func activityCard(_ activity: Activity) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
             Text(activity.content)
                 .font(.body)
+                .foregroundColor(.primary)
+
             Text(activity.timestamp, style: .relative)
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundColor(.secondary)
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.white.opacity(0.3), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
     }
 
-    func fetchActivities() {
-        APIService.shared.performRequest(endpoint: "social/feed/") { result in
-            switch result {
-            case .success(let data):
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                do {
-                    let decoded = try decoder.decode([Activity].self, from: data)
-                    DispatchQueue.main.async {
-                        self.activities = decoded
-                    }
-                } catch {
-                    print("❌ Decoding error:", error)
-                }
+//    private func fetchActivities() {
+//        APIService.shared.performRequest(endpoint: "social/feed/") { result in
+//            switch result {
+//            case .success(let data):
+//                let decoder = JSONDecoder()
+//                decoder.dateDecodingStrategy = .iso8601
+//                do {
+//                    let decoded = try decoder.decode([Activity].self, from: data)
+//                    DispatchQueue.main.async {
+//                        self.activities = decoded
+//                    }
+//                } catch {
+//                    print("❌ Decoding error:", error)
+//                }
+//
+//            case .failure(let error):
+//                print("❌ Request error:", error)
+//            }
+//        }
+//    }
+}
 
-            case .failure(let error):
-                print("❌ Request error:", error)
-            }
-        }
+// Preview
+struct ActivityFeedView_Previews: PreviewProvider {
+    static var previews: some View {
+        ActivityFeedView()
     }
 }

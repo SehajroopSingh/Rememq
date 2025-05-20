@@ -1,3 +1,12 @@
+//
+//  SocialViewModel.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 5/16/25.
+//
+
+import Foundation
+
 @MainActor
 class SocialViewModel: ObservableObject {
     @Published var friends: [User] = []
@@ -14,7 +23,7 @@ class SocialViewModel: ObservableObject {
         }
     }
 
-    private func fetchFriends() async {
+    func fetchFriends() async {
         do {
             let data = try await APIService.shared.request(endpoint: "social/friends/")
             self.friends = try JSONDecoder().decode([User].self, from: data)
@@ -23,7 +32,7 @@ class SocialViewModel: ObservableObject {
         }
     }
 
-    private func fetchIncomingRequests() async {
+    func fetchIncomingRequests() async {
         do {
             let data = try await APIService.shared.request(endpoint: "social/friend-requests/incoming/")
             self.incomingRequests = try JSONDecoder().decode([FriendRequest].self, from: data)
@@ -32,7 +41,7 @@ class SocialViewModel: ObservableObject {
         }
     }
 
-    private func fetchActivityFeed() async {
+    func fetchActivityFeed() async {
         do {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601

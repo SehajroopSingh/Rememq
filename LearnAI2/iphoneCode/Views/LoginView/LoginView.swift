@@ -1,94 +1,4 @@
-//import SwiftUI
-//import AuthenticationServices
-//import SwiftUI
-//import AuthenticationServices
-//import SwiftUI
-//import AuthenticationServices
-//
-//struct LoginView: View {
-//    @State private var username: String = ""
-//    @State private var password: String = ""
-//    @State private var errorMessage: String = ""
-//    @AppStorage("accessToken", store: UserDefaults(suiteName: "group.learnai2")) var accessToken: String = ""
-//    @AppStorage("refreshToken", store: UserDefaults(suiteName: "group.learnai2")) var refreshToken: String = ""
-//
-//
-//    @State private var isAuthenticated = false  // ✅ Track login state
-//    @State private var navigateToSignup = false // ✅ Track signup navigation
-//
-//    var body: some View {
-//        NavigationStack {
-//            VStack {
-//                TextField("Username", text: $username)
-//                    .autocapitalization(.none)
-//                    .padding()
-//                    .border(Color.gray)
-//
-//                SecureField("Password", text: $password)
-//                    .padding()
-//                    .border(Color.gray)
-//
-//                Button("Login") {
-//                    loginUser()
-//                }
-//                .padding()
-//
-//                // 🔹 Button to navigate to SignupView
-//                Button("Don't have an account? Sign up") {
-//                    navigateToSignup = true
-//                }
-//                .padding()
-//                .foregroundColor(.blue)
-//
-//                // 🔹 Apple Sign-in
-//                AppleSignInButton()
-//                    .frame(width: 200, height: 50)
-//                    .padding()
-//
-//                Text(errorMessage).foregroundColor(.red)
-//            }
-//            .padding()
-//            
-//            // ✅ Modern navigation method for iOS 16+
-//            .navigationDestination(isPresented: $navigateToSignup) {
-//                SignupView()
-//            }
-//            .navigationDestination(isPresented: $isAuthenticated) {
-//                MainContentView()
-//            }
-//        }
-//    }
-//
-//    /// 🔄 **Updated function to use `APIService.shared`**
-//    func loginUser() {
-//        let body: [String: String] = ["username": username, "password": password]
-//
-//        APIService.shared.performRequest(endpoint: "token/", method: "POST", body: body) { result in
-//            DispatchQueue.main.async {
-//                switch result {
-//                case .success(let data):
-//                    do {
-//                        if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: String],
-//                           let access = json["access"], let refresh = json["refresh"] {
-//                            
-//                            self.accessToken = access
-//                            self.refreshToken = refresh
-//                            self.password = ""
-//                            self.errorMessage = ""
-//                            self.isAuthenticated = true  // ✅ Navigate to Home after login
-//                        } else {
-//                            self.errorMessage = "Invalid JSON response."
-//                        }
-//                    } catch {
-//                        self.errorMessage = "JSON parse error: \(error.localizedDescription)"
-//                    }
-//                case .failure(let error):
-//                    self.errorMessage = "Login failed: \(error.localizedDescription)"
-//                }
-//            }
-//        }
-//    }
-//}
+
 
 import SwiftUI
 import AuthenticationServices
@@ -164,6 +74,8 @@ struct LoginView: View {
                             self.password = ""
                             self.errorMessage = ""
                             self.isAuthenticated = true  // ✅ Navigate to CustomTabBarExample
+                            APIService.shared.isLoggedOut = false
+
                         } else {
                             self.errorMessage = "Invalid JSON response."
                         }

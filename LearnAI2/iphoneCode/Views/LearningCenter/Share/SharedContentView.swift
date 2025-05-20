@@ -1,3 +1,12 @@
+//
+//  SharedContentView.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 5/19/25.
+//
+
+import SwiftUI
+
 struct SharedContentView: View {
     @StateObject private var viewModel = SharedContentViewModel()
 
@@ -88,3 +97,5 @@ struct SharedContentView: View {
         }
     }
 }
+
+

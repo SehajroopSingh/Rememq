@@ -1,3 +1,11 @@
+//
+//  SharedQuickCapture.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 5/19/25.
+//
+
+
 struct SharedQuickCapture: Identifiable, Decodable {
     let id: Int
     let content: String

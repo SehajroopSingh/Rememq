@@ -7,7 +7,7 @@
 import SwiftUI
 import Foundation
 
-struct User: Identifiable, Decodable {
+struct User: Identifiable, Decodable, Hashable {
     let id: Int
     let username: String
     let avatarURL: String?

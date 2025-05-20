@@ -29,11 +29,15 @@ import SwiftUI
 struct LearnAI2App: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject var dashboardViewModel = DashboardViewModel()
+    @StateObject private var socialVM = SocialViewModel()
+
 
     var body: some Scene {
         WindowGroup {
             LaunchingRootView()
                 .environmentObject(dashboardViewModel)
+                .environmentObject(socialVM)
+            
         }
     }
 }

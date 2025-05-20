@@ -68,6 +68,21 @@ public class APIService: ObservableObject {
             }
         }.resume()
     }
+    
+    
+    
+    public func request(endpoint: String, method: String = "GET", body: [String: Any]? = nil) async throws -> Data {
+        return try await withCheckedThrowingContinuation { continuation in
+            self.performRequest(endpoint: endpoint, method: method, body: body) { result in
+                switch result {
+                case .success(let data):
+                    continuation.resume(returning: data)
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
 
     public func refreshToken(completion: @escaping (Bool) -> Void) {
         guard let url = URL(string: baseURL + "token/refresh/") else {
@@ -109,10 +124,18 @@ public class APIService: ObservableObject {
     // 🔴 **Force Logout and Notify UI**
     private func forceLogout() {
         DispatchQueue.main.async {
-            print("🔴 Force Logging Out...")
+            print("🔴 Logging out: clearing all auth tokens")
             self.accessToken = ""
             self.refreshToken = ""
             self.isLoggedOut = true  // 🔹 Notify UI to navigate to LoginView
         }
+    }
+    public func logout() {
+        forceLogout()
+
+        // Optional: Clear all shared defaults related to auth
+        sharedDefaults?.removeObject(forKey: "accessToken")
+        sharedDefaults?.removeObject(forKey: "refreshToken")
+        sharedDefaults?.synchronize()
     }
 }
