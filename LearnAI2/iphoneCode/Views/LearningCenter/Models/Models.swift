@@ -58,6 +58,8 @@ struct Space: Codable, Identifiable, Equatable, Hashable {
     let llmDescription: String?
     let groups: [Group]
     let isPinned: Bool  // ✅ New
+    var isShared: Bool? = false
+
 
     enum CodingKeys: String, CodingKey {
         case id, name, groups
@@ -104,3 +106,53 @@ struct QuickCaptureModel: Identifiable, Codable {
         case folder
     }
 }
+
+//
+//
+//extension Space {
+//    init(from shared: SharedSpace) {
+//        self.id = shared.id
+//        self.name = shared.name
+//        self.userFacingDescription = nil
+//        self.llmDescription = nil
+//        self.groups = shared.groups.map { Group(from: $0) }
+//        self.isPinned = false
+//        self.isShared = true
+//    }
+//}
+//
+//extension Group {
+//    init(from shared: SharedGroup) {
+//        self.id = shared.id
+//        self.name = shared.name
+//        self.userFacingDescription = nil
+//        self.llmDescription = nil
+//        self.image = nil
+//        self.space = -999
+//        self.sets = shared.sets.map { SetItem(from: $0) }
+//        self.isPinned = false
+//    }
+//}
+//
+//extension SetItem {
+//    init(from shared: SharedSet) {
+//        self.id = shared.id
+//        self.title = shared.title
+//        self.userFacingDescription = nil
+//        self.llmDescription = nil
+//        self.masteryTime = "1 Month"
+//        self.group = -999
+//        self.isPinned = false
+//    }
+//
+//    init(title: String, quickCaptures: [SharedQuickCapture]) {
+//        self.id = Int.random(in: -9999...(-1000))  // placeholder
+//        self.title = title
+//        self.userFacingDescription = nil
+//        self.llmDescription = nil
+//        self.masteryTime = "1 Month"
+//        self.group = -999
+//        self.isPinned = false
+//        // Add `quickCaptures` if your `SetItem` supports them directly
+//    }
+//}

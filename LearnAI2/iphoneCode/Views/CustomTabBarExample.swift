@@ -194,7 +194,7 @@ struct CustomTabBarExample: View {
             TabView(selection: $selected) {
                 NavigationStack { DashboardView() }
                     .tag(0)
-                NavigationStack { SharedContentView() }
+                NavigationStack { CombinedSpacesView() }
                     .tag(1)
                 NavigationStack { GamificationView() }
                     .tag(2)

@@ -1,8 +1,16 @@
+//
+//  SharedAccessEntry.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 5/22/25.
+//
+import SwiftUI
+
 struct SharedAccessEntry: Identifiable, Decodable {
     let id = UUID() // temporary, since backend doesn't return one
     let user: User
     let invitedBy: User
-    let permissionLevel: String
+    var permissionLevel: String
 
     enum CodingKeys: String, CodingKey {
         case user

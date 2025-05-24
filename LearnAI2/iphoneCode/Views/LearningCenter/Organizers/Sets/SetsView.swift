@@ -249,6 +249,9 @@ struct GlassCardStyle: ViewModifier {
 struct SetsView: View {
     let group: Group
     @State private var showCreateSetSheet = false
+    @EnvironmentObject var socialVM: SocialViewModel
+
+
 
     var body: some View {
         NavigationStack {
@@ -259,7 +262,7 @@ struct SetsView: View {
                         ForEach(group.sets) { set in
                             NavigationLink(destination: QuickCapturesView(set: set)) {
                                 SetCardView(set: set)
-                            }
+                                    .environmentObject(socialVM)                            }
                             .buttonStyle(PlainButtonStyle())
                         }
                     }
@@ -293,6 +296,10 @@ struct SetCardView: View {
     @State private var llmDescription: String
     @State private var masteryTime: String
     @State private var isPinned: Bool
+    @State private var showShareSheet = false
+    @EnvironmentObject var socialVM: SocialViewModel   // ✅ Add this line
+
+
 
     private let masteryOptions = [
         "3 days", "1 week", "2 weeks", "3 weeks",
@@ -323,6 +330,17 @@ struct SetCardView: View {
                 }
                 Spacer()
                 HStack(spacing: 12) {
+                    Button(action: { showShareSheet = true }) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.title2)
+                            .foregroundColor(.blue)
+                    }
+                    .buttonStyle(GlassPinButtonStyle())
+                    .sheet(isPresented: $showShareSheet) {
+                        ShareSetModal(set: set)
+                            .environmentObject(socialVM)  // if you're using socialVM in the modal
+                    }
+
                     // Favorite button
                     Button(action: togglePin) {
                         Image(systemName: isPinned ? "star.fill" : "star")
@@ -435,5 +453,95 @@ struct SetCardView: View {
         llmDescription = set.llmDescription ?? ""
         masteryTime = set.masteryTime
         isEditing = false
+    }
+}
+struct ShareSetModal: View {
+    let set: SetItem
+    @EnvironmentObject var socialVM: SocialViewModel
+    @Environment(\.dismiss) var dismiss
+
+    @State private var selectedUser: User?
+    @State private var selectedPermission = "read_only"
+    @State private var isSharing = false
+    @State private var errorMessage: String?
+
+    private let permissionOptions = [
+        ("read_only", "Read Only"),
+        ("add_only", "Add Only"),
+        ("edit", "Edit"),
+        ("admin", "Admin")
+    ]
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Friend")) {
+                    Picker("Select a Friend", selection: $selectedUser) {
+                        ForEach(socialVM.friends) { user in
+                            Text(user.username).tag(Optional(user))
+                        }
+                    }
+                }
+
+                Section(header: Text("Permission")) {
+                    Picker("Permission", selection: $selectedPermission) {
+                        ForEach(permissionOptions, id: \.0) { value, label in
+                            Text(label).tag(value)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+
+                if let error = errorMessage {
+                    Section {
+                        Text(error).foregroundColor(.red)
+                    }
+                }
+
+                Section {
+                    Button {
+                        Task { await shareSet() }
+                    } label: {
+                        if isSharing {
+                            ProgressView()
+                        } else {
+                            Text("Share \"\(set.title)\"")
+                        }
+                    }
+                    .disabled(selectedUser == nil || isSharing)
+                }
+            }
+            .navigationTitle("Share Set")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func shareSet() async {
+        guard let user = selectedUser else { return }
+        isSharing = true
+        errorMessage = nil
+
+        do {
+            let body: [String: Any] = [
+                "target_type": "set",
+                "target_id": set.id,
+                "target_username": user.username,
+                "permission_level": selectedPermission
+            ]
+            _ = try await APIService.shared.request(
+                endpoint: "organizer/share_object/",
+                method: "PATCH",
+                body: body
+            )
+            dismiss()
+        } catch {
+            errorMessage = "Failed to share set. Try again."
+        }
+
+        isSharing = false
     }
 }

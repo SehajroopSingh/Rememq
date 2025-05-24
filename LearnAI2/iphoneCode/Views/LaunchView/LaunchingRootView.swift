@@ -8,6 +8,8 @@ import SwiftUI
 
 struct LaunchingRootView: View {
     @State private var isActive = true
+    @EnvironmentObject var socialVM: SocialViewModel  // ⬅️ Add this line
+
     @EnvironmentObject var dashboardViewModel: DashboardViewModel
     @StateObject var structureViewModel = StructureViewModel()  // ✅ shared instance
 
@@ -18,6 +20,11 @@ struct LaunchingRootView: View {
             .onAppear {
                 structureViewModel.loadStructure()
                 dashboardViewModel.loadDashboard()
+                Task {
+                    if socialVM.friends.isEmpty {
+                        socialVM.loadAllSocialData()
+                    }
+                }
             }
     }
 
