@@ -21,6 +21,11 @@ class PracticeViewModel: ObservableObject {
         return quizzes[currentIndex]
     }
 
+    var hasAnsweredCurrentQuiz: Bool {
+        guard let currentQuiz = currentQuiz else { return false }
+        return submittedResults[currentQuiz.id] != nil
+    }
+
     func loadQuizzes(limit: Int = 10) {
         isLoading = true
         errorMessage = nil
@@ -46,6 +51,10 @@ class PracticeViewModel: ObservableObject {
                         self?.remainingHearts = response.starting_hearts ?? 5
 
                         print("✅ Successfully parsed \(response.quizzes.count) quizzes")
+                        print("🔍 First quiz description: \(self?.quizzes.first?.short_description ?? "nil")")
+                        print("👤 Initial author: \(self?.quizzes.first?.initial_author?.description ?? "nil")")
+                        print("📊 Mastery level: \(self?.quizzes.first?.previous_performance?.mastery_level ?? -1)")
+
 
                     } catch {
                         print("❌ Decoding error: \(error)")
@@ -229,7 +238,7 @@ private struct QuizResponse: Codable {
     
     let session_id: String
     let quizzes: [Quiz]
-    let starting_hearts: Int?  // ← Add this (optional in case backend doesn’t return it yet)
+    let starting_hearts: Int?  // ← Add this (optional in case backend doesn't return it yet)
 
 }
 

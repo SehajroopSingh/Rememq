@@ -62,6 +62,7 @@ struct FillBlankWithOptionsView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text(quiz.question_text ?? "Choose the correct word to fill in:")
                 .font(.headline)
+                .foregroundColor(.primary)
 
             if let options = quiz.options {
                 ForEach(options.indices, id: \.self) { index in
@@ -81,35 +82,72 @@ struct FillBlankWithOptionsView: View {
                             }
                         }
                         .padding()
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(8)
+                        .background(
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.white.opacity(0.1))
+                                    .background(.ultraThinMaterial)
+                                    .blur(radius: 0.3)
+                                
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(
+                                        LinearGradient(
+                                            colors: [Color.white.opacity(0.5), Color.white.opacity(0.1)],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1
+                                    )
+                            }
+                        )
+                        .shadow(color: .white.opacity(0.15), radius: 2, x: -1, y: -1)
+                        .shadow(color: .black.opacity(0.2), radius: 3, x: 1, y: 2)
                     }
                     .disabled(submitted)
                     .foregroundColor(.primary)
                 }
             }
 
-            if showExplanation, let explanation = quiz.explanation {
-                Text("Explanation: \(explanation)")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                    .padding(.top)
+            if showExplanation {
+                VStack(alignment: .leading, spacing: 8) {
+                    if let explanation = quiz.explanation {
+                        Text("Explanation: \(explanation)")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+
+                    if submitted, let selectedIdx = selectedOption {
+                        let isCorrect = selectedIdx == quiz.correctAnswerIndex
+                        HStack {
+                            Image(systemName: isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                .foregroundColor(isCorrect ? .green : .red)
+                            Text(isCorrect ? "Correct!" : "Incorrect")
+                                .foregroundColor(isCorrect ? .green : .red)
+                        }
+                    }
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(.ultraThinMaterial)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                        )
+                )
             }
         }
     }
 
     func handleSubmission(index: Int) {
-        showExplanation = true
         submitted = true
-
+        showExplanation = true
         let isCorrect = index == quiz.correctAnswerIndex
-        let userInput = String(index)
-
         viewModel.recordResponse(
             for: quiz,
             wasCorrect: isCorrect,
             score: isCorrect ? 1.0 : 0.0,
-            userInput: userInput
+            userInput: String(index)
         )
     }
 }

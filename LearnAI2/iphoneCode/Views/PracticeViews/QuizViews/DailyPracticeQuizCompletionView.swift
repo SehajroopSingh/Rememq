@@ -4,51 +4,12 @@
 ////
 ////  Created by Sehaj Singh on 4/15/25.
 ////
-//import SwiftUI
-//
-//struct DailyPracticeQuizCompletionView: View {
-//    @ObservedObject var viewModel: PracticeViewModel
-//    @State private var submitted = false
-//    @State private var submissionMessage = "Submitting..."
-//
-//    var body: some View {
-//        VStack(spacing: 20) {
-//            Text("🎉 You've completed all quizzes!")
-//                .font(.title)
-//                .multilineTextAlignment(.center)
-//
-//            if submitted {
-//                Text(submissionMessage)
-//                    .foregroundColor(.gray)
-//            } else {
-//                ProgressView("Submitting your results...")
-//            }
-//
-//            if submitted {
-//                Button("Done") {
-//                    // Optionally pop the view or reset session
-//                }
-//                .buttonStyle(.borderedProminent)
-//            }
-//        }
-//        .padding()
-//        .onAppear {
-//            submit()
-//        }
-//    }
-//
-//    func submit() {
-//        guard !submitted else { return }
-//
-//        viewModel.submitQuizSession()
-//        submitted = true
-//        submissionMessage = "✅ Session submitted successfully!"
-//    }
-//}
 import SwiftUI
 
 struct DailyPracticeQuizCompletionView: View {
     @ObservedObject var viewModel: PracticeViewModel
+    @EnvironmentObject var tabManager: TabSelectionManager
+    @Environment(\.dismiss) var dismiss
 
     @State private var isLoading = true
     @State private var result: SessionResultResponse?
@@ -58,9 +19,27 @@ struct DailyPracticeQuizCompletionView: View {
         VStack(spacing: 20) {
             if isLoading {
                 ProgressView("Calculating Results...")
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(.ultraThinMaterial)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            )
+                    )
             } else if let error = error {
                 Text("⚠️ Error: \(error)")
                     .foregroundColor(.red)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(.ultraThinMaterial)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            )
+                    )
             } else if let result = result {
                 let oldXP = viewModel.initialDashboardSnapshot?.xp ?? 0
                 let oldGems = viewModel.initialDashboardSnapshot?.gems ?? 0
@@ -70,22 +49,77 @@ struct DailyPracticeQuizCompletionView: View {
                 let newGems = oldGems + result.coinsDelta
                 let newStreak = oldStreak + result.pointsDelta
 
-                VStack(spacing: 12) {
+                VStack(spacing: 16) {
                     Text("🎉 Session Complete!")
                         .font(.title)
                         .bold()
 
-                    Text("⭐ XP: \(oldXP) + \(result.xpDelta) = \(newXP)")
-                    Text("💎 Gems: \(oldGems) + \(result.coinsDelta) = \(newGems)")
-                    Text("🔥 Streak Points: \(oldStreak) + \(result.pointsDelta) = \(newStreak)")
+                    VStack(alignment: .leading, spacing: 12) {
+                        StatRow(icon: "⭐", label: "XP", oldValue: oldXP, delta: result.xpDelta, newValue: newXP)
+                        StatRow(icon: "💎", label: "Gems", oldValue: oldGems, delta: result.coinsDelta, newValue: newGems)
+                        StatRow(icon: "🔥", label: "Streak", oldValue: oldStreak, delta: result.pointsDelta, newValue: newStreak)
+                    }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(.ultraThinMaterial)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(
+                                        LinearGradient(
+                                            colors: [Color.white.opacity(0.5), Color.white.opacity(0.1)],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1
+                                    )
+                            )
+                    )
+                    .shadow(color: .white.opacity(0.15), radius: 2, x: -1, y: -1)
+                    .shadow(color: .black.opacity(0.2), radius: 3, x: 1, y: 2)
 
                     Text("✅ \(result.message)")
                         .foregroundColor(.green)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(.ultraThinMaterial)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                )
+                        )
 
-                    Button("Done") {
-                        // You could navigate back or reset session state here
+                    Button(action: {
+                        // Navigate to dashboard
+                        tabManager.selectedTab = 0
+                        dismiss()
+                    }) {
+                        Text("Return to Dashboard")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color.blue.opacity(0.2))
+                                        .background(.ultraThinMaterial)
+                                        .blur(radius: 0.3)
+                                    
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(
+                                            LinearGradient(
+                                                colors: [Color.white.opacity(0.6), Color.white.opacity(0.1)],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 1
+                                        )
+                                }
+                            )
+                            .foregroundColor(.white)
+                            .shadow(color: .white.opacity(0.15), radius: 2, x: -1, y: -1)
+                            .shadow(color: .black.opacity(0.2), radius: 3, x: 1, y: 2)
                     }
-                    .buttonStyle(.borderedProminent)
                     .padding(.top, 16)
                 }
             }
@@ -104,5 +138,24 @@ struct DailyPracticeQuizCompletionView: View {
                 }
             }
         }
+    }
+}
+
+struct StatRow: View {
+    let icon: String
+    let label: String
+    let oldValue: Int
+    let delta: Int
+    let newValue: Int
+    
+    var body: some View {
+        HStack {
+            Text(icon)
+            Text(label)
+            Spacer()
+            Text("\(oldValue) + \(delta) = \(newValue)")
+                .foregroundColor(.primary)
+        }
+        .font(.system(.body, design: .rounded))
     }
 }

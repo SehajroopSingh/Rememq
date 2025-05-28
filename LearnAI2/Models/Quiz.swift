@@ -29,9 +29,20 @@ struct Quiz: Codable, Identifiable {
     
     // Fill-in-the-blank with options
     let options: [String]?  // ✅ Added explicitly for fillBlankWithOptions
+    
+    
     let state: QuizState?  // ✅ Add this
     
     let recent_attempts: [QuizAttempt]?
+    
+    
+    
+    
+    let difficulty: String
+
+    let short_description: String?
+    let initial_author: Int?
+    let previous_performance: PerformanceData?
 
 
     enum CodingKeys: String, CodingKey {
@@ -46,6 +57,18 @@ struct Quiz: Codable, Identifiable {
         case options  // ✅ Map directly
         case state
         case recent_attempts  // ✅ add this
+        
+        case difficulty
+
+        
+        
+        case short_description
+        case initial_author
+        case previous_performance
+
+        
+        
+        
 
 
         
@@ -73,6 +96,13 @@ struct Quiz: Codable, Identifiable {
         let raw = try? decoder.container(keyedBy: DynamicCodingKeys.self)
         fillBlankAnswer = try? raw?.decode(String.self, forKey: DynamicCodingKeys(stringValue: "correct_answer")!)
         trueFalseAnswer = try? raw?.decode(String.self, forKey: DynamicCodingKeys(stringValue: "correct_answer")!)
+        
+        short_description = try? container.decode(String.self, forKey: .short_description)
+        initial_author = try? container.decode(Int.self, forKey: .initial_author)
+        previous_performance = try? container.decode(PerformanceData.self, forKey: .previous_performance)
+        difficulty = try container.decode(String.self, forKey: .difficulty)
+
+
     }
 }
 
@@ -106,4 +136,12 @@ struct QuizAttempt: Codable, Identifiable {
     let was_correct: Bool
     let score: Double
     let response_data: [String: String]?
+}
+
+
+
+struct PerformanceData: Codable {
+    let correct_attempts: Int
+    let total_attempts: Int
+    let mastery_level: Double
 }

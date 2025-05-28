@@ -10,6 +10,8 @@ struct DashboardView: View {
     @State private var navigateToSet = false
     @State private var navigateToGroup = false
     @State private var navigateToSpace = false
+    @State private var showPractice = false
+
 
     var body: some View {
 
@@ -79,7 +81,37 @@ struct DashboardView: View {
                                 
                                 // Full-width Button
                                 // 3D Glassmorphism Button
-                                NavigationLink(destination: DailyPracticeView()) {
+//                                NavigationLink(destination: DailyPracticeView()) {
+//                                    Text("Start Practice")
+//                                        .fontWeight(.semibold)
+//                                        .frame(maxWidth: .infinity)
+//                                        .padding()
+//                                        .background(
+//                                            ZStack {
+//                                                // Frosted glass layer
+//                                                RoundedRectangle(cornerRadius: 16)
+//                                                    .fill(Color.white.opacity(0.15))
+//                                                    .background(.ultraThinMaterial)
+//                                                    .blur(radius: 0.5)
+//                                                    .shadow(color: .white.opacity(0.2), radius: 2, x: -2, y: -2)
+//                                                    .shadow(color: .black.opacity(0.25), radius: 4, x: 2, y: 4)
+//
+//                                                // Inner shine
+//                                                RoundedRectangle(cornerRadius: 16)
+//                                                    .strokeBorder(LinearGradient(
+//                                                        colors: [Color.white.opacity(0.6), Color.white.opacity(0.05)],
+//                                                        startPoint: .topLeading,
+//                                                        endPoint: .bottomTrailing
+//                                                    ), lineWidth: 1.5)
+//                                            }
+//                                        )
+//                                        .foregroundColor(.white)
+//                                        .cornerRadius(16)
+//                                        .padding(.horizontal)
+//                                }
+                                Button(action: {
+                                    showPractice = true
+                                }) {
                                     Text("Start Practice")
                                         .fontWeight(.semibold)
                                         .frame(maxWidth: .infinity)
@@ -107,6 +139,11 @@ struct DashboardView: View {
                                         .cornerRadius(16)
                                         .padding(.horizontal)
                                 }
+                                .fullScreenCover(isPresented: $showPractice) {
+                                    QuizPracticeView()
+                                        .environmentObject(dashboardViewModel)
+                                }
+
 
                                 
                                 // 🔹 New Card-Style Section Below Daily Practice Button 🔹

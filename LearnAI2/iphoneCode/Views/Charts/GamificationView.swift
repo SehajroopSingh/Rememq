@@ -25,6 +25,15 @@ struct GamificationView: View {
                     .font(.title)
                     .fontWeight(.bold)
                     .padding(.top)
+                // Add navigation button here 👇
+                NavigationLink(destination: HighlighterView()) {
+                    Text("Test Highlighter")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.blue)
+                        .cornerRadius(10)
+                }
 
                 if viewModel.xpHistory.isEmpty {
                     ProgressView("Loading XP...")
