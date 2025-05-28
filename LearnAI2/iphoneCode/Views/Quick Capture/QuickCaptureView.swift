@@ -151,7 +151,7 @@ struct QuickCaptureView: View {
                 .padding()
             }
             .fullScreenCover(isPresented: $isExpanded) {
-                FullCaptureView(isExpanded: $isExpanded,
+                HighlighterView(isExpanded: $isExpanded,
                                 showAcknowledgment: $showAcknowledgment)
             }
 

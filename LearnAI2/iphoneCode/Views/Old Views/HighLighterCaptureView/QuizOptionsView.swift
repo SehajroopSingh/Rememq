@@ -1,3 +1,11 @@
+//
+//  QuizOptionsView.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 5/28/25.
+//
+import SwiftUI
+
 struct QuizOptionsView: View {
     @Binding var selectedDifficulty: HighlighterView.Difficulty
     @Binding var selectedMasteryTime: HighlighterView.MasteryTime

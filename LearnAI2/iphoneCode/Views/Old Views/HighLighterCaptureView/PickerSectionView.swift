@@ -1,3 +1,11 @@
+//
+//  PickerSectionView.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 5/28/25.
+//
+import SwiftUI
+
 struct PickerSectionView: View {
     @ObservedObject var viewModel: StructureViewModel
     @Binding var selectedSpace: Space?
