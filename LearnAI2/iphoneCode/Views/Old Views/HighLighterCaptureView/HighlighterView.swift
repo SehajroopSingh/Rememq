@@ -2,18 +2,23 @@ import SwiftUI
 import UIKit
 
 struct HighlighterView: View {
-    enum HighlightColor: CaseIterable, Identifiable {
-        case yellow, blue, green, red
-        var id: Self { self }
-        var uiColor: UIColor {
-            switch self {
-            case .yellow: return .yellow
-            case .blue:   return .systemBlue
-            case .green:  return .green
-            case .red:    return .systemRed
-            }
+    enum HighlightColor: String, CaseIterable, Identifiable {
+      case yellow = "yellow"
+      case blue   = "blue"
+      case green  = "green"
+      case red    = "red"
+
+      var id: Self { self }
+      var uiColor: UIColor {
+        switch self {
+          case .yellow: return .yellow
+          case .blue:   return .systemBlue
+          case .green:  return .green
+          case .red:    return .systemRed
         }
+      }
     }
+
     
     // Presentation bindings
     @Binding var isExpanded: Bool
@@ -135,12 +140,37 @@ struct HighlighterView: View {
         .disabled(disabled)
     }
     private func submitCapture() {
+        
+        let mergedRanges = highlightedRanges
+            .sorted { $0.range.location < $1.range.location }
+            .reduce(into: [(range: NSRange, color: HighlightColor)]()) { acc, item in
+                if let last = acc.last,
+                   last.color == item.color,
+                   last.range.upperBound == item.range.location {
+                    // Extend the previous range
+                    let combinedLength = last.range.length + item.range.length
+                    let combinedRange = NSRange(location: last.range.location, length: combinedLength)
+                    acc[acc.count - 1] = (range: combinedRange, color: last.color)
+                } else {
+                    acc.append(item)
+                }
+            }
+
+        let highlightsData = mergedRanges.map { item -> [String: String] in
+            let substring = (text as NSString).substring(with: item.range)
+            return [
+                "text": substring,
+                "color": item.color.rawValue
+            ]
+        }
+
         var payload: [String: Any] = [
             "content": thought,
             "context": additionalContext,
             "difficulty": selectedDifficulty.rawValue,
             "mastery_time": selectedMasteryTime.rawValue,
-            "depth_of_learning": selectedDepth.rawValue
+            "depth_of_learning": selectedDepth.rawValue,
+            "highlights": highlightsData
         ]
         if let set = selectedSet {
             payload["set"] = set.id
@@ -366,6 +396,9 @@ struct CustomTextView: UIViewRepresentable {
         init(_ parent: CustomTextView) {
             self.parent = parent
         }
+        func textViewDidChange(_ textView: UITextView) {
+            parent.text = textView.text
+        }
 
         @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
             // 1️⃣ Allow erasing OR highlighting
@@ -449,19 +482,42 @@ struct CustomTextView: UIViewRepresentable {
         return textView
     }
 
+//    func updateUIView(_ uiView: UITextView, context: Context) {
+//        let attributed = NSMutableAttributedString(string: text)
+//        uiView.isSelectable = !isHighlighting
+//
+//
+//        for item in highlightedRanges {
+//            let maxRange = NSRange(location: 0, length: attributed.length)
+//            if NSLocationInRange(item.range.location, maxRange),
+//               item.range.upperBound <= attributed.length {
+//                attributed.addAttribute(.backgroundColor, value: item.color.uiColor, range: item.range)
+//            }
+//        }
+//
+//        uiView.attributedText = attributed
+//    }
     func updateUIView(_ uiView: UITextView, context: Context) {
-        let attributed = NSMutableAttributedString(string: text)
-
-        for item in highlightedRanges {
-            let maxRange = NSRange(location: 0, length: attributed.length)
-            if NSLocationInRange(item.range.location, maxRange),
-               item.range.upperBound <= attributed.length {
-                attributed.addAttribute(.backgroundColor, value: item.color.uiColor, range: item.range)
-            }
+        // keep textView's base text in sync only if needed
+        if uiView.text != text {
+            uiView.text = text
         }
 
-        uiView.attributedText = attributed
+        // turn native selection on/off
+        uiView.isSelectable = !isHighlighting
+        uiView.isEditable   = !isHighlighting    // (optional: hide keyboard)
+
+        // apply / scrub highlight attributes
+        uiView.textStorage.removeAttribute(.backgroundColor,
+                                           range: NSRange(location: 0,
+                                                          length: uiView.textStorage.length))
+        for item in highlightedRanges {
+            uiView.textStorage.addAttribute(.backgroundColor,
+                                            value: item.color.uiColor,
+                                            range: item.range)
+        }
     }
+
 
 }
 
