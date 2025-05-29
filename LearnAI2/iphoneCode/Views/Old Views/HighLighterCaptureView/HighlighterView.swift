@@ -56,7 +56,6 @@ struct HighlighterView: View {
 
 
     // MARK: – State
-    @State private var text = "Highlight parts of this text."
     @State private var isHighlighting = false
     @State private var selectedColor: HighlightColor = .yellow
     @State private var highlightedRanges: [(range: NSRange, color: HighlightColor)] = []
@@ -70,75 +69,137 @@ struct HighlighterView: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 16) {
-                PickerSectionView(
-                    viewModel: viewModel,
-                    selectedSpace: $selectedSpace,
-                    selectedGroup: $selectedGroup,
-                    selectedSet: $selectedSet
-                )
+            ZStack {
 
-                QuizOptionsView(
-                    selectedDifficulty: $selectedDifficulty,
-                    selectedMasteryTime: $selectedMasteryTime,
-                    selectedDepth: $selectedDepth
-                )
+            
 
-                saveButton
-
-                if !responseMessage.isEmpty {
-                    Text(responseMessage)
-                        .foregroundColor(.gray)
-                        .padding(.top, 8)
+                BlobbyBackground()
+                    .ignoresSafeArea()
+                VStack(spacing: 16) {
+                    
+                    GeometryReader { geo in
+                        ZStack(alignment: .topLeading) {
+                            
+                            ContentEditorView(
+                                thought: $thought,
+                                isHighlighting: $isHighlighting,
+                                selectedColor: $selectedColor,
+                                highlightedRanges: $highlightedRanges,
+                                isErasing: $isErasing,
+                                showWheel: $showWheel,
+                                dragLocation: $dragLocation,
+                                additionalContext: $additionalContext // ← add this line
+                                
+                            ) { pickedColor in
+                                selectedColor = pickedColor
+                            }
+                            
+                            
+                            
+                        }
+                    }
+                    
+                    
+                    
+                    
+                    PickerSectionView(
+                        viewModel: viewModel,
+                        selectedSpace: $selectedSpace,
+                        selectedGroup: $selectedGroup,
+                        selectedSet: $selectedSet
+                    )
+                    
+                    QuizOptionsView(
+                        selectedDifficulty: $selectedDifficulty,
+                        selectedMasteryTime: $selectedMasteryTime,
+                        selectedDepth: $selectedDepth
+                    )
+                    
+                    saveButton
+                    
+                    if !responseMessage.isEmpty {
+                        Text(responseMessage)
+                            .foregroundColor(.gray)
+                            .padding(.top, 8)
+                    }
                 }
-            }
-
-            .padding()
-            .navigationTitle("Expand Your Thought")
-
-            .onAppear {
-                print("[DEBUG] FullCaptureView appeared, loading structure...")
-                viewModel.loadStructure()
+                
+                .onAppear {
+                    print("[DEBUG] FullCaptureView appeared, loading structure...")
+                    viewModel.loadStructure()
+                }
             }
         }
 
-        GeometryReader { geo in
-            ZStack(alignment: .topLeading) {
-
-                ContentEditorView(
-                    text: $text,
-                    isHighlighting: $isHighlighting,
-                    selectedColor: $selectedColor,
-                    highlightedRanges: $highlightedRanges,
-                    isErasing: $isErasing,
-                    showWheel: $showWheel,
-                    dragLocation: $dragLocation
-                ) { pickedColor in
-                    selectedColor = pickedColor
-                }
-
-
-
-            }
-        }
+//        GeometryReader { geo in
+//            ZStack(alignment: .topLeading) {
+//
+//                ContentEditorView(
+//                    text: $text,
+//                    isHighlighting: $isHighlighting,
+//                    selectedColor: $selectedColor,
+//                    highlightedRanges: $highlightedRanges,
+//                    isErasing: $isErasing,
+//                    showWheel: $showWheel,
+//                    dragLocation: $dragLocation
+//                ) { pickedColor in
+//                    selectedColor = pickedColor
+//                }
+//
+//
+//
+//            }
+//        }
         
         
     }
     
 
+//    private var saveButton: some View {
+//        let disabled = thought.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+//        print("[DEBUG] Rendering save button, disabled: \(disabled)")
+//        return Button(action: submitCapture) {
+//            Text("Save Thought")
+//                .padding()
+//                .frame(maxWidth: .infinity)
+//                .background(Color.blue)
+//                .foregroundColor(.white)
+//                .cornerRadius(10)
+//        }
+//        .disabled(disabled)
+//    }
     private var saveButton: some View {
         let disabled = thought.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        print("[DEBUG] Rendering save button, disabled: \(disabled)")
         return Button(action: submitCapture) {
             Text("Save Thought")
-                .padding()
+                .fontWeight(.semibold)
+                .padding(.vertical, 12)
+                .padding(.horizontal, 24)
                 .frame(maxWidth: .infinity)
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(10)
+                .background(
+                    // Glassmorphic background
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(.ultraThinMaterial)
+                        .background(
+                            // Slight glowing border behind
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                .blur(radius: 4)
+                        )
+                )
+                .overlay(
+                    // Sharp border overlay
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color.white.opacity(0.6), lineWidth: 0.5)
+                )
+                .shadow(color: Color.white.opacity(disabled ? 0 : 0.2), radius: 8, x: 0, y: 0)
+                .opacity(disabled ? 0.6 : 1)
         }
         .disabled(disabled)
     }
+    
+    
+    
     private func submitCapture() {
         
         let mergedRanges = highlightedRanges
@@ -157,7 +218,7 @@ struct HighlighterView: View {
             }
 
         let highlightsData = mergedRanges.map { item -> [String: String] in
-            let substring = (text as NSString).substring(with: item.range)
+            let substring = (thought as NSString).substring(with: item.range)
             return [
                 "text": substring,
                 "color": item.color.rawValue
@@ -292,7 +353,7 @@ struct HighlighterView: View {
         return groups.compactMap { run in
             guard let first = run.first, let last = run.last else { return nil }
             let length = last.upperBound - first.location
-            let ns = text as NSString
+            let ns = thought as NSString
             return ns.substring(with: NSRange(first.location..<first.location+length))
         }
     }
@@ -543,5 +604,4 @@ extension NSString {
         return NSRange(location: start, length: end - start)
     }
 }
-
 

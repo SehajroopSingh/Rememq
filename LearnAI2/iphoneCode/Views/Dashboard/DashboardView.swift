@@ -79,36 +79,7 @@ struct DashboardView: View {
                                 QuickCaptureView()
                                 
                                 
-                                // Full-width Button
-                                // 3D Glassmorphism Button
-//                                NavigationLink(destination: DailyPracticeView()) {
-//                                    Text("Start Practice")
-//                                        .fontWeight(.semibold)
-//                                        .frame(maxWidth: .infinity)
-//                                        .padding()
-//                                        .background(
-//                                            ZStack {
-//                                                // Frosted glass layer
-//                                                RoundedRectangle(cornerRadius: 16)
-//                                                    .fill(Color.white.opacity(0.15))
-//                                                    .background(.ultraThinMaterial)
-//                                                    .blur(radius: 0.5)
-//                                                    .shadow(color: .white.opacity(0.2), radius: 2, x: -2, y: -2)
-//                                                    .shadow(color: .black.opacity(0.25), radius: 4, x: 2, y: 4)
-//
-//                                                // Inner shine
-//                                                RoundedRectangle(cornerRadius: 16)
-//                                                    .strokeBorder(LinearGradient(
-//                                                        colors: [Color.white.opacity(0.6), Color.white.opacity(0.05)],
-//                                                        startPoint: .topLeading,
-//                                                        endPoint: .bottomTrailing
-//                                                    ), lineWidth: 1.5)
-//                                            }
-//                                        )
-//                                        .foregroundColor(.white)
-//                                        .cornerRadius(16)
-//                                        .padding(.horizontal)
-//                                }
+
                                 Button(action: {
                                     showPractice = true
                                 }) {
