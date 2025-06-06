@@ -107,7 +107,7 @@ struct QuizBlock: View {
                     .replacingOccurrences(of: "_", with: " ")
                     .capitalized
             )
-            .bold()
+            
         }
         .padding()
         .background(RoundedRectangle(cornerRadius: 10).stroke(Color.secondary))

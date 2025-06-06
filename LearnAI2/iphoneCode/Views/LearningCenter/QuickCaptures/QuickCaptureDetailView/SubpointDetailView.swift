@@ -17,11 +17,25 @@ struct SubpointDetailView: View {
             if let support = sp.supportingText {
                 InfoBlock(title: "Support", content: support, bgColor: Color.yellow.opacity(0.05))
             }
+//            if let state = sp.state {
+//                SpacedRepetitionStateView(state: state)
+//            }
             if let state = sp.state {
-                SpacedRepetitionStateView(state: state)
+                HStack {
+                    Spacer()
+                    NavigationLink(destination: QuizPerformanceStatsDetailView(subPoint: sp)) {
+                        HStack {
+                            Image(systemName: "chart.bar.xaxis")
+                            Text("Show Subpoint Performance")
+                        }
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                    }
+                }
             }
+
             if !sp.quizzes.isEmpty {
-                DisclosureGroup("🧠 Quizzes for Subpoint") {
+                DisclosureGroup("Quizzes for Subpoint") {
                     ForEach(sp.quizzes) { quiz in
                         QuizBlock(quiz: quiz)
                     }

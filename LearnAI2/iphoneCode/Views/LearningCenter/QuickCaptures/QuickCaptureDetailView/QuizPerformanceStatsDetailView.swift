@@ -7,28 +7,48 @@
 import SwiftUI
 
 struct QuizPerformanceStatsDetailView: View {
-    let quiz: Quiz
+    let title: String
+    let state: QuizState
+    let attempts: [QuizAttempt]
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Quiz Performance Details")
+                Text(title)
                     .font(.title2)
                     .bold()
 
-                // Placeholder — replace with real chart later
-                Text("📊 Charts coming soon...")
+                // State
+                SpacedRepetitionStateView(state: state)
 
-                // Quiz State Summary
-                if let state = quiz.state {
-                    SpacedRepetitionStateView(state: state)
+                // Recent Attempts (if any)
+                if !attempts.isEmpty {
+                    QuizAttemptsView(attempts: attempts)
+                } else {
+                    Text("No recent attempts").italic()
                 }
-
-                // Recent Attempts
-                QuizAttemptsView(attempts: quiz.recent_attempts ?? [])
             }
             .padding()
         }
         .navigationTitle("Performance")
+    }
+}
+extension QuizPerformanceStatsDetailView {
+    init(quiz: Quiz) {
+        self.title = "Quiz Performance"
+        self.state = quiz.state!
+        self.attempts = quiz.recent_attempts ?? []
+    }
+
+    init(mainPoint: MainPointWithQuizzes) {
+        self.title = "Main Point Performance"
+        self.state = mainPoint.state!
+        self.attempts = []  // Main points don’t have attempts directly
+    }
+
+    init(subPoint: SubPointWithQuizzes) {
+        self.title = "Subpoint Performance"
+        self.state = subPoint.state!
+        self.attempts = []  // Subpoints don’t have attempts directly
     }
 }

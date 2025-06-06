@@ -15,6 +15,8 @@ struct DirectQuizzesView: View {
                 QuizBlock(quiz: quiz)
             }
         }
+        .bold()
+
         .padding()
         .background(RoundedRectangle(cornerRadius: 10).stroke(Color.gray))
     }
