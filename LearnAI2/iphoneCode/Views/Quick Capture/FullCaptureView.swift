@@ -1,6 +1,15 @@
 //import SwiftUI
-//
-///// A full‑screen sheet for capturing a thought and filing it under
+//import SwiftUI
+//#if canImport(UIKit)
+///// Helper to resign first-responder from anywhere
+//extension View {
+//    func hideKeyboard() {
+//        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+//                                        to: nil, from: nil, for: nil)
+//    }
+//}
+//#endif
+///// A full-screen sheet for capturing a thought and filing it under
 ///// an existing **Space → Group → Set** hierarchy pulled from Django.
 //struct FullCaptureView: View {
 //    // Presentation bindings
@@ -21,7 +30,6 @@
 //    @State private var selectedSet: SetItem?
 //
 //    // Quiz options
-//    // Quiz options
 //    enum Difficulty: String, CaseIterable, Identifiable {
 //        case easy = "Easy", mediumEasy = "Medium-Easy", medium = "Medium", mediumHard = "Medium-Hard", hard = "Hard"
 //        var id: String { rawValue }
@@ -38,45 +46,91 @@
 //    @State private var selectedDifficulty: Difficulty = .easy
 //    @State private var selectedMasteryTime: MasteryTime = .oneMonth
 //    @State private var selectedDepth: DepthOfLearning = .normal
-//    
-//    @State private var selectedColor: HighlighterView.HighlightColor = .yellow
+//
+//    // Highlighter state
+//    typealias HighlightColor = HighlighterView.HighlightColor
+//    @State private var selectedColor: HighlightColor = .yellow
 //    @State private var isHighlighting = false
 //    @State private var isErasing = false
 //    @State private var showWheel = false
 //    @State private var dragLocation: CGPoint = .zero
-//    @State private var highlightedRanges: [(range: NSRange, color: HighlighterView.HighlightColor)] = []
+//    @State private var highlightedRanges: [(range: NSRange, color: HighlightColor)] = []
 //
-//
+////    var body: some View {
+////        NavigationView {
+////            ZStack {
+////                Color.clear
+////                ScrollView {
+////                    VStack(spacing: 16) {
+////                        pickersSection
+////                        optionsSection
+////                        textFieldsSection
+////                        saveButton
+////                        
+////                        if !responseMessage.isEmpty {
+////                            Text(responseMessage)
+////                                .foregroundColor(.gray)
+////                                .padding(.top, 8)
+////                        }
+////                    }
+////                    .padding()
+////                }
+////                // ← Prevent the ScrollView from being pushed up when the keyboard appears:
+////                .ignoresSafeArea(.keyboard, edges: .bottom)
+////                .navigationTitle("Expand Your Thought")
+////                .toolbar {
+////                    ToolbarItem(placement: .navigationBarLeading) {
+////                        Button("Cancel") {
+////                            print("[DEBUG] Cancel tapped, collapsing view")
+////                            isExpanded = false
+////                        }
+////                    }
+////                }
+////                .onAppear {
+////                    print("[DEBUG] FullCaptureView appeared, loading structure…")
+////                    viewModel.loadStructure()
+////                }
+////            }
+////        }
+////
+////    }
 //    var body: some View {
 //        NavigationView {
-//            VStack(spacing: 16) {
+//            VStack(spacing: 16) {          // <–– NO ScrollView here
+//                // 1️⃣ Static controls that must never move
 //                pickersSection
 //                optionsSection
-//                textFieldsSection
+//                
+//                // 2️⃣ Scrolling text areas that *may* be covered
+//                ScrollView {
+//                    textFieldsSection          // CustomTextView + “additionalContext”
+//                        .padding(.bottom, 8)
+//                }
+//                .scrollDismissesKeyboard(.interactively)
+//                
 //                saveButton
 //                if !responseMessage.isEmpty {
 //                    Text(responseMessage)
 //                        .foregroundColor(.gray)
-//                        .padding(.top, 8)
 //                }
 //            }
 //            .padding()
+//            .ignoresSafeArea(.keyboard, edges: .bottom)   // now works — nothing above is inside a ScrollView
+//            .onTapGesture { hideKeyboard() }
+//            
 //            .navigationTitle("Expand Your Thought")
 //            .toolbar {
 //                ToolbarItem(placement: .navigationBarLeading) {
-//                    Button("Cancel") {
-//                        print("[DEBUG] Cancel tapped, collapsing view")
-//                        isExpanded = false
-//                    }
+//                    Button("Cancel") { isExpanded = false }
+//                }
+//                ToolbarItemGroup(placement: .keyboard) {
+//                    Spacer()
+//                    Button("Done") { hideKeyboard() }
 //                }
 //            }
-//            .onAppear {
-//                print("[DEBUG] FullCaptureView appeared, loading structure...")
-//                viewModel.loadStructure()
-//            }
+//            .onAppear { viewModel.loadStructure() }
 //        }
 //    }
-//
 //    // MARK: - Sections
 //    private var pickersSection: some View {
 //        VStack(spacing: 12) {
@@ -116,17 +170,15 @@
 //            }
 //        }
 //        .onAppear {
-//            if viewModel.spaces.isEmpty {
-//                print("[DEBUG] No spaces loaded yet")
-//            } else {
-//                print("[DEBUG] Loaded \(viewModel.spaces.count) spaces")
-//            }
+//            print(viewModel.spaces.isEmpty ? "[DEBUG] No spaces loaded yet" : "[DEBUG] Loaded \(viewModel.spaces.count) spaces")
 //        }
 //        .onChange(of: selectedSpace) { newSpace in
 //            print("[DEBUG] Selected space: \(newSpace?.name ?? "none")")
+//            selectedGroup = nil; selectedSet = nil
 //        }
 //        .onChange(of: selectedGroup) { newGroup in
 //            print("[DEBUG] Selected group: \(newGroup?.name ?? "none")")
+//            selectedSet = nil
 //        }
 //        .onChange(of: selectedSet) { newSet in
 //            print("[DEBUG] Selected set: \(newSet?.title ?? "none")")
@@ -166,27 +218,10 @@
 //            print("[DEBUG] Mastery time changed to: \(new.rawValue)")
 //        }
 //        .onChange(of: selectedDepth) { new in
-//            print("[DEBUG] Depth of learning changed to: \(new.rawValue)")
+//            print("[DEBUG] Depth changed to: \(new.rawValue)")
 //        }
 //    }
 //
-////    private var textFieldsSection: some View {
-////        VStack(spacing: 12) {
-////            TextField("Write your main thought here…", text: $thought)
-////                .padding()
-////                .frame(height: 100)
-////                .background(Color(.systemGray6))
-////                .cornerRadius(10)
-////
-////            TextField("Add more context…", text: $additionalContext)
-////                .padding()
-////                .background(Color(.systemGray6))
-////                .cornerRadius(10)
-////        }
-////        .onAppear {
-////            print("[DEBUG] Text fields ready, current thought length: \(thought.count)")
-////        }
-////    }
 //    private var textFieldsSection: some View {
 //        VStack(spacing: 12) {
 //            ZStack(alignment: .topTrailing) {
@@ -207,8 +242,8 @@
 //                )
 //                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
 //
+//                let buttonCenter = CGPoint(x: 44, y: 44)
 //                VStack(spacing: 12) {
-//                    // Highlighter button
 //                    Circle()
 //                        .fill(isHighlighting ? Color(selectedColor.uiColor) : .white)
 //                        .frame(width: 44, height: 44)
@@ -219,15 +254,10 @@
 //                        }
 //                        .onLongPressGesture(minimumDuration: 0.4,
 //                                            pressing: { pressing in
-//                                              // animate your wheel in/out
-//                                              withAnimation { showWheel = pressing }
-//                                              if pressing { dragLocation = buttonCenter }
-//                                            },
-//                                            perform: {
-//                                              // you can leave this empty if you don’t need to do anything extra
-//                                            })
+//                                                withAnimation { showWheel = pressing }
+//                                                if pressing { dragLocation = buttonCenter }
+//                                            }, perform: {})
 //
-//                    // Eraser
 //                    Button {
 //                        isErasing.toggle()
 //                        isHighlighting = false
@@ -242,19 +272,16 @@
 //                }
 //                .padding(.top, 10)
 //                .padding(.trailing, 10)
-//                @State private var selectedColor: HighlighterView.HighlightColor = .yellow
 //
-//                // Wheel
 //                if showWheel {
 //                    FlywheelMenu(
-//                        center: CGPoint(x: 60, y: 60),
+//                        center: buttonCenter,
 //                        dragLocation: dragLocation,
 //                        colors: HighlightColor.allCases
 //                    )
 //                }
 //            }
 //
-//            // Existing context input
 //            TextField("Add more context…", text: $additionalContext)
 //                .padding()
 //                .background(Color(.systemGray6))
@@ -277,7 +304,6 @@
 //    }
 //
 //    private func submitCapture() {
-////        print("[DEBUG] submitCapture called with thought='\(thought)' context='\(additionalContext)' setId=\(selectedSet?.id.map(String.init) ?? "none")")
 //        var payload: [String: Any] = [
 //            "content": thought,
 //            "context": additionalContext,
@@ -319,35 +345,40 @@
 //    }
 //}
 import SwiftUI
+#if canImport(UIKit)
+/// Helper to resign first-responder from anywhere
+extension View {
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil, from: nil, for: nil
+        )
+    }
+}
+#endif
 
-/// A full-screen sheet for capturing a thought and filing it under
-/// an existing **Space → Group → Set** hierarchy pulled from Django.
 struct FullCaptureView: View {
-    // Presentation bindings
     @Binding var isExpanded: Bool
     @Binding var showAcknowledgment: Bool
 
-    // Text input
     @State private var thought: String = ""
     @State private var additionalContext: String = ""
     @State private var responseMessage: String = ""
-
-    // Structure loader
     @StateObject private var viewModel = StructureViewModel()
 
-    // Selections (Optional so Picker can bind)
     @State private var selectedSpace: Space?
     @State private var selectedGroup: Group?
     @State private var selectedSet: SetItem?
 
-    // Quiz options
     enum Difficulty: String, CaseIterable, Identifiable {
-        case easy = "Easy", mediumEasy = "Medium-Easy", medium = "Medium", mediumHard = "Medium-Hard", hard = "Hard"
+        case easy = "Easy", mediumEasy = "Medium-Easy", medium = "Medium",
+             mediumHard = "Medium-Hard", hard = "Hard"
         var id: String { rawValue }
     }
     enum MasteryTime: String, CaseIterable, Identifiable {
-        case threeDays = "3 days", oneWeek = "1 week", twoWeeks = "2 weeks", threeWeeks = "3 weeks"
-        case oneMonth = "1 month", threeMonths = "3 months", oneYear = "1 year", indefinitely = "Indefinitely"
+        case threeDays = "3 days", oneWeek = "1 week", twoWeeks = "2 weeks",
+             threeWeeks = "3 weeks", oneMonth = "1 month", threeMonths = "3 months",
+             oneYear = "1 year", indefinitely = "Indefinitely"
         var id: String { rawValue }
     }
     enum DepthOfLearning: String, CaseIterable, Identifiable {
@@ -358,7 +389,6 @@ struct FullCaptureView: View {
     @State private var selectedMasteryTime: MasteryTime = .oneMonth
     @State private var selectedDepth: DepthOfLearning = .normal
 
-    // Highlighter state
     typealias HighlightColor = HighlighterView.HighlightColor
     @State private var selectedColor: HighlightColor = .yellow
     @State private var isHighlighting = false
@@ -368,34 +398,54 @@ struct FullCaptureView: View {
     @State private var highlightedRanges: [(range: NSRange, color: HighlightColor)] = []
 
     var body: some View {
-        NavigationView {
-            VStack(spacing: 16) {
-                pickersSection
-                optionsSection
-                textFieldsSection
-                saveButton
-                if !responseMessage.isEmpty {
-                    Text(responseMessage)
-                        .foregroundColor(.gray)
-                        .padding(.top, 8)
-                }
-            }
-            .padding()
-            .navigationTitle("Expand Your Thought")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        print("[DEBUG] Cancel tapped, collapsing view")
-                        isExpanded = false
+            ZStack {
+                // This gesture helps override the default SwiftUI behavior.
+                Color.clear
+                    .contentShape(Rectangle()) // Makes full ZStack tappable
+                    .simultaneousGesture(
+                        TapGesture().onEnded { hideKeyboard() }
+                    )
+                
+                NavigationView {
+                    VStack(spacing: 16) {
+                        // Controls that should NOT move
+                        pickersSection
+                        optionsSection
+                        
+                        // Text input area – may be covered by keyboard
+                        ScrollView {
+                            VStack(spacing: 12) {
+                                textFieldsSection
+                                Spacer().frame(height: 300) // absorbs keyboard space
+                            }
+                        }
+                        .scrollDismissesKeyboard(.interactively)
+                        
+                        saveButton
+                        
+                        if !responseMessage.isEmpty {
+                            Text(responseMessage)
+                                .foregroundColor(.gray)
+                        }
                     }
+                    .padding()
+                    .navigationTitle("Expand Your Thought")
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button("Cancel") { isExpanded = false }
+                        }
+                        ToolbarItemGroup(placement: .keyboard) {
+                            Spacer()
+                            Button("Done") { hideKeyboard() }
+                        }
+                    }
+                    .onAppear { viewModel.loadStructure() }
                 }
+                .navigationViewStyle(StackNavigationViewStyle())
             }
-            .onAppear {
-                print("[DEBUG] FullCaptureView appeared, loading structure...")
-                viewModel.loadStructure()
-            }
+            .ignoresSafeArea(.keyboard, edges: .bottom) // MOST IMPORTANT
         }
-    }
+    
 
     // MARK: - Sections
     private var pickersSection: some View {
@@ -418,7 +468,8 @@ struct FullCaptureView: View {
                     }
                     .pickerStyle(.menu)
                 } else {
-                    Text("Select a space first").foregroundColor(.secondary)
+                    Text("Select a space first")
+                        .foregroundColor(.secondary)
                 }
 
                 if let sets = selectedGroup?.sets {
@@ -431,12 +482,17 @@ struct FullCaptureView: View {
                 } else if selectedGroup != nil {
                     Text("Loading sets…").foregroundColor(.secondary)
                 } else {
-                    Text("Select a group first").foregroundColor(.secondary)
+                    Text("Select a group first")
+                        .foregroundColor(.secondary)
                 }
             }
         }
         .onAppear {
-            print(viewModel.spaces.isEmpty ? "[DEBUG] No spaces loaded yet" : "[DEBUG] Loaded \(viewModel.spaces.count) spaces")
+            print(
+                viewModel.spaces.isEmpty
+                    ? "[DEBUG] No spaces loaded yet"
+                    : "[DEBUG] Loaded \(viewModel.spaces.count) spaces"
+            )
         }
         .onChange(of: selectedSpace) { newSpace in
             print("[DEBUG] Selected space: \(newSpace?.name ?? "none")")
@@ -475,7 +531,11 @@ struct FullCaptureView: View {
             .pickerStyle(.menu)
         }
         .onAppear {
-            print("[DEBUG] Options: Difficulty=\(selectedDifficulty.rawValue), Mastery=\(selectedMasteryTime.rawValue), Depth=\(selectedDepth.rawValue)")
+            print(
+                "[DEBUG] Options: Difficulty=\(selectedDifficulty.rawValue), " +
+                "Mastery=\(selectedMasteryTime.rawValue), " +
+                "Depth=\(selectedDepth.rawValue)"
+            )
         }
         .onChange(of: selectedDifficulty) { new in
             print("[DEBUG] Difficulty changed to: \(new.rawValue)")
@@ -522,7 +582,8 @@ struct FullCaptureView: View {
                                             pressing: { pressing in
                                                 withAnimation { showWheel = pressing }
                                                 if pressing { dragLocation = buttonCenter }
-                                            }, perform: {})
+                                            },
+                                            perform: {})
 
                     Button {
                         isErasing.toggle()
@@ -532,7 +593,10 @@ struct FullCaptureView: View {
                         Image(systemName: "eraser.fill")
                             .foregroundColor(isErasing ? .white : .black)
                             .padding()
-                            .background(Circle().fill(isErasing ? Color.red : Color.white))
+                            .background(
+                                Circle()
+                                    .fill(isErasing ? Color.red : Color.white)
+                            )
                             .shadow(radius: 4)
                     }
                 }
@@ -556,8 +620,10 @@ struct FullCaptureView: View {
     }
 
     private var saveButton: some View {
-        let disabled = thought.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        print("[DEBUG] Rendering save button, disabled: \(disabled)")
+        let disabled = thought
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .isEmpty
+
         return Button(action: submitCapture) {
             Text("Save Thought")
                 .padding()
@@ -603,7 +669,6 @@ struct FullCaptureView: View {
     }
 
     private func closeAndFlash() {
-        print("[DEBUG] closeAndFlash: hiding view and showing acknowledgment")
         isExpanded = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             showAcknowledgment = true

@@ -385,23 +385,23 @@ import SwiftUI
 //        }
 //    }
 //}
-func formatDateToDayMonthYear(_ isoString: String) -> String {
-    let isoFormatter = ISO8601DateFormatter()
-    isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-
-    guard let date = isoFormatter.date(from: isoString) ??
-                    ISO8601DateFormatter().date(from: isoString) else {
-        return isoString
-    }
-
-    let formatter = DateFormatter()
-    formatter.dateStyle = .medium
-    formatter.timeStyle = .none
-    formatter.locale = .current
-    formatter.timeZone = .current
-
-    return formatter.string(from: date)
-}
+//func formatDateToDayMonthYear(_ isoString: String) -> String {
+//    let isoFormatter = ISO8601DateFormatter()
+//    isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+//
+//    guard let date = isoFormatter.date(from: isoString) ??
+//                    ISO8601DateFormatter().date(from: isoString) else {
+//        return isoString
+//    }
+//
+//    let formatter = DateFormatter()
+//    formatter.dateStyle = .medium
+//    formatter.timeStyle = .none
+//    formatter.locale = .current
+//    formatter.timeZone = .current
+//
+//    return formatter.string(from: date)
+//}
 
 //// Reuse your QuizDisclosureContent from before:
 //struct QuizDisclosureContent: View {

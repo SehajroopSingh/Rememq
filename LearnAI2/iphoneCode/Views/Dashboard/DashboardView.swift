@@ -11,6 +11,8 @@ struct DashboardView: View {
     @State private var navigateToGroup = false
     @State private var navigateToSpace = false
     @State private var showPractice = false
+    @StateObject private var practiceViewModel = PracticeViewModel()
+
 
 
     var body: some View {
@@ -81,6 +83,7 @@ struct DashboardView: View {
                                 
 
                                 Button(action: {
+                                    practiceViewModel.context = .fromDashboard
                                     showPractice = true
                                 }) {
                                     Text("Start Practice")
@@ -112,7 +115,7 @@ struct DashboardView: View {
                                 }
                                 .fullScreenCover(isPresented: $showPractice) {
                                     QuizPracticeView()
-                                        .environmentObject(dashboardViewModel)
+                                        .environmentObject(practiceViewModel)
                                 }
 
 

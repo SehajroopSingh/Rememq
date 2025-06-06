@@ -71,8 +71,7 @@ struct HighlighterView: View {
         NavigationView {
             ZStack {
 
-            
-
+        
                 BlobbyBackground()
                     .ignoresSafeArea()
                 VStack(spacing: 16) {
@@ -128,9 +127,18 @@ struct HighlighterView: View {
                     print("[DEBUG] FullCaptureView appeared, loading structure...")
                     viewModel.loadStructure()
                 }
+                .ignoresSafeArea(.keyboard, edges: .bottom)
+
             }
         }
-
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    hideKeyboard()
+                }
+            }
+        }
 //        GeometryReader { geo in
 //            ZStack(alignment: .topLeading) {
 //
@@ -442,12 +450,149 @@ struct Triangle: Shape {
     }
 }
 
+//struct CustomTextView: UIViewRepresentable {
+//    @Binding var selectedColor: HighlighterView.HighlightColor
+//    @Binding var text: String
+//    @Binding var isHighlighting: Bool
+//   // ← new binding
+//
+//    @Binding var highlightedRanges: [(range: NSRange, color: HighlighterView.HighlightColor)]
+//    @Binding var isErasing: Bool
+//
+//    class Coordinator: NSObject, UITextViewDelegate {
+//        var parent: CustomTextView
+//
+//        init(_ parent: CustomTextView) {
+//            self.parent = parent
+//        }
+//        func textViewDidChange(_ textView: UITextView) {
+//            parent.text = textView.text
+//        }
+//
+//        @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
+//            // 1️⃣ Allow erasing OR highlighting
+//            guard (parent.isHighlighting || parent.isErasing),
+//                  let textView = gesture.view as? UITextView else { return }
+//
+//            // 2️⃣ Figure out which word is under the finger
+//            let layout = textView.layoutManager
+//            let container = textView.textContainer
+//            let loc = gesture.location(in: textView)
+//            let textOffset = CGPoint(
+//                x: loc.x - textView.textContainerInset.left,
+//                y: loc.y - textView.textContainerInset.top
+//            )
+//            layout.ensureLayout(for: container)
+//            let glyphIdx = layout.glyphIndex(for: textOffset, in: container)
+//            let charIdx = layout.characterIndexForGlyph(at: glyphIdx)
+//            guard charIdx < textView.textStorage.length else { return }
+//
+//            let ns = textView.textStorage.string as NSString
+//            let wordRange = ns.rangeOfWord(at: charIdx)
+//
+//            // 3️⃣ If we’re highlighting, add
+//            if parent.isHighlighting {
+//                // 1) Remove any existing highlights that overlap this word
+//                parent.highlightedRanges.removeAll { existing in
+//                    NSIntersectionRange(existing.range, wordRange).length > 0
+//                }
+//                // 2) Update the model
+//                parent.highlightedRanges.append((range: wordRange, color: parent.selectedColor))
+//
+//                // 3) Update the view’s attributes:
+//                //    First clear any old backgroundColor on this wordRange,
+//                //    then set the new one.
+//                textView.textStorage.removeAttribute(.backgroundColor, range: wordRange)
+//                textView.textStorage.addAttribute(
+//                    .backgroundColor,
+//                    value: parent.selectedColor.uiColor,
+//                    range: wordRange
+//                )
+//            }
+//            // 4️⃣ If we’re erasing, remove
+//            else if parent.isErasing {
+//                let toRemove = parent.highlightedRanges.filter {
+//                    NSIntersectionRange($0.range, wordRange).length > 0
+//                }
+//                guard !toRemove.isEmpty else { return }
+//
+//                // remove from state
+//                parent.highlightedRanges.removeAll { item in
+//                    toRemove.contains { $0.range == item.range }
+//                }
+//                // scrub the attributes
+//                for rem in toRemove {
+//                    textView.textStorage.removeAttribute(.backgroundColor, range: rem.range)
+//                }
+//            }
+//        }
+//    }
+//
+//
+//    func makeCoordinator() -> Coordinator {
+//        Coordinator(self)
+//    }
+//
+//    func makeUIView(context: Context) -> UITextView {
+//        let textView = UITextView()
+//        textView.font = UIFont.systemFont(ofSize: 18)
+//        textView.delegate = context.coordinator
+//        textView.isScrollEnabled = true
+//        textView.isEditable = true
+//        textView.isSelectable = true
+//        textView.backgroundColor = .clear
+//        textView.textContainerInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
+//
+//
+//        let pan = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePan(_:)))
+//        pan.cancelsTouchesInView = false
+//        textView.addGestureRecognizer(pan)
+//
+//        return textView
+//    }
+//
+////    func updateUIView(_ uiView: UITextView, context: Context) {
+////        let attributed = NSMutableAttributedString(string: text)
+////        uiView.isSelectable = !isHighlighting
+////
+////
+////        for item in highlightedRanges {
+////            let maxRange = NSRange(location: 0, length: attributed.length)
+////            if NSLocationInRange(item.range.location, maxRange),
+////               item.range.upperBound <= attributed.length {
+////                attributed.addAttribute(.backgroundColor, value: item.color.uiColor, range: item.range)
+////            }
+////        }
+////
+////        uiView.attributedText = attributed
+////    }
+//    func updateUIView(_ uiView: UITextView, context: Context) {
+//        // keep textView's base text in sync only if needed
+//        if uiView.text != text {
+//            uiView.text = text
+//        }
+//
+//        // turn native selection on/off
+//        uiView.isSelectable = !isHighlighting
+//        uiView.isEditable   = !isHighlighting    // (optional: hide keyboard)
+//
+//        // apply / scrub highlight attributes
+//        uiView.textStorage.removeAttribute(.backgroundColor,
+//                                           range: NSRange(location: 0,
+//                                                          length: uiView.textStorage.length))
+//        for item in highlightedRanges {
+//            uiView.textStorage.addAttribute(.backgroundColor,
+//                                            value: item.color.uiColor,
+//                                            range: item.range)
+//        }
+//    }
+//
+//
+//}
 struct CustomTextView: UIViewRepresentable {
     @Binding var selectedColor: HighlighterView.HighlightColor
     @Binding var text: String
     @Binding var isHighlighting: Bool
-   // ← new binding
-
     @Binding var highlightedRanges: [(range: NSRange, color: HighlighterView.HighlightColor)]
     @Binding var isErasing: Bool
 
@@ -457,69 +602,23 @@ struct CustomTextView: UIViewRepresentable {
         init(_ parent: CustomTextView) {
             self.parent = parent
         }
+
         func textViewDidChange(_ textView: UITextView) {
             parent.text = textView.text
         }
 
         @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
-            // 1️⃣ Allow erasing OR highlighting
-            guard (parent.isHighlighting || parent.isErasing),
-                  let textView = gesture.view as? UITextView else { return }
+            // ... your existing pan/highlight logic ...
+        }
 
-            // 2️⃣ Figure out which word is under the finger
-            let layout = textView.layoutManager
-            let container = textView.textContainer
-            let loc = gesture.location(in: textView)
-            let textOffset = CGPoint(
-                x: loc.x - textView.textContainerInset.left,
-                y: loc.y - textView.textContainerInset.top
+        @objc func doneTapped(_ sender: Any) {
+            // Dismiss the keyboard by resigning first responder
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.resignFirstResponder),
+                to: nil, from: nil, for: nil
             )
-            layout.ensureLayout(for: container)
-            let glyphIdx = layout.glyphIndex(for: textOffset, in: container)
-            let charIdx = layout.characterIndexForGlyph(at: glyphIdx)
-            guard charIdx < textView.textStorage.length else { return }
-
-            let ns = textView.textStorage.string as NSString
-            let wordRange = ns.rangeOfWord(at: charIdx)
-
-            // 3️⃣ If we’re highlighting, add
-            if parent.isHighlighting {
-                // 1) Remove any existing highlights that overlap this word
-                parent.highlightedRanges.removeAll { existing in
-                    NSIntersectionRange(existing.range, wordRange).length > 0
-                }
-                // 2) Update the model
-                parent.highlightedRanges.append((range: wordRange, color: parent.selectedColor))
-
-                // 3) Update the view’s attributes:
-                //    First clear any old backgroundColor on this wordRange,
-                //    then set the new one.
-                textView.textStorage.removeAttribute(.backgroundColor, range: wordRange)
-                textView.textStorage.addAttribute(
-                    .backgroundColor,
-                    value: parent.selectedColor.uiColor,
-                    range: wordRange
-                )
-            }
-            // 4️⃣ If we’re erasing, remove
-            else if parent.isErasing {
-                let toRemove = parent.highlightedRanges.filter {
-                    NSIntersectionRange($0.range, wordRange).length > 0
-                }
-                guard !toRemove.isEmpty else { return }
-
-                // remove from state
-                parent.highlightedRanges.removeAll { item in
-                    toRemove.contains { $0.range == item.range }
-                }
-                // scrub the attributes
-                for rem in toRemove {
-                    textView.textStorage.removeAttribute(.backgroundColor, range: rem.range)
-                }
-            }
         }
     }
-
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -535,40 +634,39 @@ struct CustomTextView: UIViewRepresentable {
         textView.backgroundColor = .clear
         textView.textContainerInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
 
+        // ─── Add a toolbar with “Done” above the keyboard ───
+        let toolbar = UIToolbar(frame: CGRect(x: 0,
+                                              y: 0,
+                                              width: UIScreen.main.bounds.width,
+                                              height: 44))
+        toolbar.barStyle = .default
+        let flex = UIBarButtonItem(barButtonSystemItem: .flexibleSpace,
+                                   target: nil,
+                                   action: nil)
+        let done = UIBarButtonItem(title: "Done",
+                                   style: .done,
+                                   target: context.coordinator,
+                                   action: #selector(Coordinator.doneTapped(_:)))
+        toolbar.items = [flex, done]
+        textView.inputAccessoryView = toolbar
+        // ────────────────────────────────────────────────────
 
-        let pan = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePan(_:)))
+        let pan = UIPanGestureRecognizer(target: context.coordinator,
+                                         action: #selector(Coordinator.handlePan(_:)))
         pan.cancelsTouchesInView = false
         textView.addGestureRecognizer(pan)
 
         return textView
     }
 
-//    func updateUIView(_ uiView: UITextView, context: Context) {
-//        let attributed = NSMutableAttributedString(string: text)
-//        uiView.isSelectable = !isHighlighting
-//
-//
-//        for item in highlightedRanges {
-//            let maxRange = NSRange(location: 0, length: attributed.length)
-//            if NSLocationInRange(item.range.location, maxRange),
-//               item.range.upperBound <= attributed.length {
-//                attributed.addAttribute(.backgroundColor, value: item.color.uiColor, range: item.range)
-//            }
-//        }
-//
-//        uiView.attributedText = attributed
-//    }
     func updateUIView(_ uiView: UITextView, context: Context) {
-        // keep textView's base text in sync only if needed
         if uiView.text != text {
             uiView.text = text
         }
 
-        // turn native selection on/off
         uiView.isSelectable = !isHighlighting
-        uiView.isEditable   = !isHighlighting    // (optional: hide keyboard)
+        uiView.isEditable   = !isHighlighting
 
-        // apply / scrub highlight attributes
         uiView.textStorage.removeAttribute(.backgroundColor,
                                            range: NSRange(location: 0,
                                                           length: uiView.textStorage.length))
@@ -578,8 +676,6 @@ struct CustomTextView: UIViewRepresentable {
                                             range: item.range)
         }
     }
-
-
 }
 
 extension NSString {

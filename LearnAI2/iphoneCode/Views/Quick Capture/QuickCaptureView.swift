@@ -150,11 +150,10 @@ struct QuickCaptureView: View {
                 }
                 .padding()
             }
-            .fullScreenCover(isPresented: $isExpanded) {
+            .sheet(isPresented: $isExpanded) {
                 HighlighterView(isExpanded: $isExpanded,
                                 showAcknowledgment: $showAcknowledgment)
             }
-
             if showAcknowledgment {
                 CameraShutterAcknowledgmentView(showAcknowledgment: $showAcknowledgment)
                     .zIndex(2)

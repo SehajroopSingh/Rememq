@@ -1,3 +1,11 @@
+//
+//  MainPointDetailView.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 6/5/25.
+//
+import SwiftUI
+
 struct MainPointDetailView: View {
     let mp: MainPointWithQuizzes
 

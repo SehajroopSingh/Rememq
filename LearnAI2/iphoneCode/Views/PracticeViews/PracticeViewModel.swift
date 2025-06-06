@@ -1,7 +1,18 @@
 import SwiftUI
 import Combine
 
+enum PracticeContext {
+    case fromDashboard
+    case daily(limit: Int)
+    case fromSet(id: Int)
+    case fromGroup(id: Int)
+    case fromSpace(id: Int)
+}
+
+@MainActor
 class PracticeViewModel: ObservableObject {
+    @Published var context: PracticeContext? = nil
+
     @Published var quizzes: [Quiz] = []
     @Published var currentIndex: Int = 0
     @Published var isLoading = false
@@ -186,6 +197,46 @@ class PracticeViewModel: ObservableObject {
 //            }
 //        }
 //    }
+//    func submitQuizSession(completion: @escaping (Result<SessionResultResponse, Error>) -> Void) {
+//        guard let sessionID = sessionID else {
+//            print("⚠️ No session ID")
+//            completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No session ID"])))
+//            return
+//        }
+//
+//        let payload: [String: Any] = [
+//            "session_id": sessionID,
+//            "results": submittedResults.values.map {
+//                [
+//                    "quiz_id": $0.quiz_id,
+//                    "was_correct": $0.was_correct,
+//                    "score": $0.score,
+//                    "response_data": $0.response_data
+//                ]
+//            }
+//        ]
+//                
+//                APIService.shared.performRequest(
+//                    endpoint: "scheduler/submit-session/",
+//                    method: "POST",
+//                    body: payload
+//                ) { result in
+//                    switch result {
+//                    case .success(let data):
+//                        do {
+//                            let decoded = try JSONDecoder().decode(SessionResultResponse.self, from: data)
+//                            print("✅ Submission success with result: \(decoded)")
+//                            completion(.success(decoded))
+//                        } catch {
+//                            print("❌ Decoding error: \(error)")
+//                            completion(.failure(error))
+//                        }
+//                    case .failure(let error):
+//                        print("❌ Submission failed: \(error.localizedDescription)")
+//                        completion(.failure(error))
+//                    }
+//                }
+//            }
     func submitQuizSession(completion: @escaping (Result<SessionResultResponse, Error>) -> Void) {
         guard let sessionID = sessionID else {
             print("⚠️ No session ID")
@@ -193,40 +244,47 @@ class PracticeViewModel: ObservableObject {
             return
         }
 
+        let resultsArray = submittedResults.values.map {
+            [
+                "quiz_id": $0.quiz_id,
+                "was_correct": $0.was_correct,
+                "score": $0.score,
+                "response_data": $0.response_data
+            ]
+        }
+
+        guard !resultsArray.isEmpty else {
+            print("🚫 No quiz results to submit. Skipping submission.")
+            completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No quiz results to submit"])))
+            return
+        }
+
         let payload: [String: Any] = [
             "session_id": sessionID,
-            "results": submittedResults.values.map {
-                [
-                    "quiz_id": $0.quiz_id,
-                    "was_correct": $0.was_correct,
-                    "score": $0.score,
-                    "response_data": $0.response_data
-                ]
-            }
+            "results": resultsArray
         ]
-                
-                APIService.shared.performRequest(
-                    endpoint: "scheduler/submit-session/",
-                    method: "POST",
-                    body: payload
-                ) { result in
-                    switch result {
-                    case .success(let data):
-                        do {
-                            let decoded = try JSONDecoder().decode(SessionResultResponse.self, from: data)
-                            print("✅ Submission success with result: \(decoded)")
-                            completion(.success(decoded))
-                        } catch {
-                            print("❌ Decoding error: \(error)")
-                            completion(.failure(error))
-                        }
-                    case .failure(let error):
-                        print("❌ Submission failed: \(error.localizedDescription)")
-                        completion(.failure(error))
-                    }
+
+        APIService.shared.performRequest(
+            endpoint: "scheduler/submit-session/",
+            method: "POST",
+            body: payload
+        ) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    let decoded = try JSONDecoder().decode(SessionResultResponse.self, from: data)
+                    print("✅ Submission success with result: \(decoded)")
+                    completion(.success(decoded))
+                } catch {
+                    print("❌ Decoding error: \(error)")
+                    completion(.failure(error))
                 }
+            case .failure(let error):
+                print("❌ Submission failed: \(error.localizedDescription)")
+                completion(.failure(error))
             }
-            
+        }
+    }
 
 }
 

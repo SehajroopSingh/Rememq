@@ -11,7 +11,7 @@ import SwiftUI
 struct QuizPracticeView: View {
     @EnvironmentObject var dashboardViewModel: DashboardViewModel
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = PracticeViewModel()
+    @EnvironmentObject var viewModel: PracticeViewModel
 
     var body: some View {
         ZStack {
@@ -131,7 +131,23 @@ struct QuizPracticeView: View {
         }
 
         .onAppear {
-            viewModel.loadQuizzes(limit: 3)
+            if viewModel.quizzes.isEmpty {
+                switch viewModel.context {
+                case .fromSet(let id):
+                    viewModel.loadQuizzesFromSet(setId: id)
+                case .fromGroup(let id):
+                    // Add if you implement group support later
+                    break
+                case .fromSpace(let id):
+                    // Add if you implement space support later
+                    break
+                case .daily(let limit):
+                    viewModel.loadQuizzes(limit: limit)
+                case .fromDashboard, .none:
+                    viewModel.loadQuizzes()
+                }
+            }
+
             if let snapshot = dashboardViewModel.dashboardData {
                 viewModel.initialDashboardSnapshot = snapshot
                 print("📋 Using shared dashboard snapshot: \(snapshot)")
@@ -139,6 +155,7 @@ struct QuizPracticeView: View {
                 print("❗️Dashboard data was nil on appear")
             }
         }
+
         .navigationBarBackButtonHidden(true)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarHidden(true)
@@ -266,52 +283,7 @@ struct QuizMetadataHeaderView: View {
                 .font(.title)
                 .foregroundStyle(.blue)
                 .padding(.top, 4)
-//
-//            if let desc = quiz.short_description {
-//                Text(desc)
-//                    .font(.callout)
-//                    .fontWeight(.semibold)
-//                    .foregroundStyle(.primary)
-//            }
-//
-//            HStack(spacing: 12) {
-//                Text("\(quiz.difficulty)")
-//                    .font(.subheadline)
-//                    .foregroundStyle(.secondary)
-//                    .font(.footnote)
-//                    .foregroundColor(.white)
-//                    .padding(.horizontal, 10)
-//                    .padding(.vertical, 4)
-//                    .background(.ultraThinMaterial)
-//                    .clipShape(Capsule())
-//                    .overlay(
-//                        Capsule().stroke(Color.white.opacity(0.3), lineWidth: 1)
-//                    )
-//
-//                if let author = quiz.initial_author {
-//                    Text("Author: #\(author)")
-//                        .font(.subheadline)
-//                        .foregroundStyle(.secondary)
-//                }
-//            }
-//
-//            if let perf = quiz.previous_performance, perf.total_attempts == 0 {
-//                Text("New")
-//                    .font(.footnote)
-//                    .foregroundColor(.white)
-//                    .padding(.horizontal, 10)
-//                    .padding(.vertical, 4)
-//                    .background(.ultraThinMaterial)
-//                    .clipShape(Capsule())
-//                    .overlay(
-//                        Capsule().stroke(Color.white.opacity(0.3), lineWidth: 1)
-//                    )
-//            }
-//            //            if let perf = quiz.previous_performance {
-//            //                Text("You got \(perf.correct_attempts)/\(perf.total_attempts) correct before. Mastery: \(Int(perf.mastery_level * 100))%")
-//            //                    .font(.footnote)
-//            //                    .foregroundStyle(.gray)
-//            //            }
+
             HStack(alignment: .top, spacing: 12) {
                 // 📌 Short description on the left
                 if let desc = quiz.short_description {

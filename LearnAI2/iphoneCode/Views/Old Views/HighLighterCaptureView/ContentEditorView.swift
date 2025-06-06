@@ -402,6 +402,18 @@ struct ContentEditorView: View {
             }
         }
         .coordinateSpace(name: "editorSpace")
+        // ─── ADD THIS TOOLBAR so the TextEditor gets a “Done” button ───
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    UIApplication.shared.sendAction(
+                        #selector(UIResponder.resignFirstResponder),
+                        to: nil, from: nil, for: nil
+                    )
+                }
+            }
+        }
     }
     
     private var header: some View {

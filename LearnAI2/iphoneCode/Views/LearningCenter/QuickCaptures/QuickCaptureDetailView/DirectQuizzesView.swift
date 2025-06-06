@@ -1,3 +1,11 @@
+//
+//  DirectQuizzesView.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 6/5/25.
+//
+
+import SwiftUI
 struct DirectQuizzesView: View {
     let directQuizzes: [Quiz]
 

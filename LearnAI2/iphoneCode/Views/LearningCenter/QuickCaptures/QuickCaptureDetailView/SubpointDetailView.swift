@@ -1,6 +1,14 @@
-struct SubpointDetailView: View {
-    let sp: Subpoint
+//
+//  SubpointDetailView.swift
+//  ReMEMq
+//
+//  Created by Sehaj Singh on 6/5/25.
+//
 
+import SwiftUI
+
+struct SubpointDetailView: View {
+    let sp: SubPointWithQuizzes  
     var body: some View {
         DisclosureGroup(sp.text) {
             if let context = sp.context {

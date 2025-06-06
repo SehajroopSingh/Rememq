@@ -125,7 +125,27 @@ struct DailyPracticeQuizCompletionView: View {
             }
         }
         .padding()
+//        .onAppear {
+//            viewModel.submitQuizSession { submissionResult in
+//                DispatchQueue.main.async {
+//                    isLoading = false
+//                    switch submissionResult {
+//                    case .success(let response):
+//                        result = response
+//                    case .failure(let err):
+//                        error = err.localizedDescription
+//                    }
+//                }
+//            }
+//        }
         .onAppear {
+            guard !viewModel.quizzes.isEmpty, !viewModel.submittedResults.isEmpty else {
+                print("🛑 Skipping submission: No quizzes or no results.")
+                isLoading = false
+                error = "No answers were submitted."
+                return
+            }
+
             viewModel.submitQuizSession { submissionResult in
                 DispatchQueue.main.async {
                     isLoading = false
@@ -138,6 +158,7 @@ struct DailyPracticeQuizCompletionView: View {
                 }
             }
         }
+
     }
 }
 

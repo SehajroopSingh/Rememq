@@ -57,12 +57,42 @@ struct QuickCaptureQuizResponse: Codable {
 
 
 
-struct MainPointWithQuizzes: Codable {
+//struct MainPointWithQuizzes: Codable {
+//    let id: Int
+//    let text: String
+//    let context: String?
+//    let state: QuizState?  // ✅ Reuse QuizState
+//    let quizzes: [Quiz]
+//}
+
+
+struct MainPointWithQuizzes: Codable, Identifiable {
     let id: Int
     let text: String
     let context: String?
-    let state: QuizState?  // ✅ Reuse QuizState
+    let supportingText: String?
+    let order: Int?
+    let state: QuizState?
     let quizzes: [Quiz]
+    let subpoints: [SubPointWithQuizzes]
+
+    enum CodingKeys: String, CodingKey {
+        case id, text, context, state, quizzes, subpoints
+        case supportingText = "supporting_text"
+        case order
+    }
 }
 
+struct SubPointWithQuizzes: Codable , Identifiable{
+    let id: Int
+    let text: String
+    let context: String?
+    let supportingText: String?    // ✅ Add this line
+    let state: QuizState?
+    let quizzes: [Quiz]
 
+    enum CodingKeys: String, CodingKey {
+        case id, text, context, state, quizzes
+        case supportingText = "supporting_text"
+    }
+}
